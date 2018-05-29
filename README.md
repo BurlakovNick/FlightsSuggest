@@ -1,2 +1,2 @@
 # FlightsSuggest
-Aggregator for cheap flights news
+Aggregator for cheap flight news
