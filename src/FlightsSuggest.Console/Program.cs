@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Linq;
+using FlightsSuggest.ConsoleApp.Infrastructure;
+using FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte;
+using FlightsSuggest.ConsoleApp.Notifications;
+using FlightsSuggest.ConsoleApp.Timelines;
 using Newtonsoft.Json;
 using VkNet;
 using VkNet.Model.RequestParams;
@@ -10,40 +14,24 @@ namespace FlightsSuggest.ConsoleApp
     {
         static void Main(string[] args)
         {
-            var vkApi = new VkApi();
+            var vkApplicationId = (ulong)int.Parse(args[0]);
+            var vkAccessToken = args[1];
 
-            vkApi.Authorize(new ApiAuthParams
+            var vkontakteTimeline = new VkontakteTimeline(
+                "vandroukiru",
+                new FileOffsetStorage(),
+                new FileFlightNewsStorage(),
+                new VkontakteClient(vkApplicationId, vkAccessToken),
+                new FlightNewsFactory()
+            );
+
+            vkontakteTimeline.Actualize();
+
+            Console.WriteLine(vkontakteTimeline.LatestOffset);
+            foreach (var line in vkontakteTimeline.ReadNews(0).Select(JsonConvert.SerializeObject))
             {
-                ApplicationId = (ulong)int.Parse(args[0]),
-                AccessToken = args[1]
-            });
-            Console.WriteLine(vkApi.Token);
-
-            var wall = vkApi.Wall.Get(new WallGetParams
-            {
-                Count = 5,
-                Offset = 0,
-                Domain = "vandroukiru",
-            });
-
-            var posts = wall
-                .WallPosts
-                .Select(x => new VkWallPost
-                {
-                    Id = x.Id,
-                    GroupId = x.OwnerId,
-                    Text = x.Text
-                })
-                .ToArray();
-
-            Console.WriteLine(JsonConvert.SerializeObject(posts));
+                Console.WriteLine(line);
+            }
         }
-    }
-
-    public class VkWallPost
-    {
-        public long? Id { get; set; }
-        public long? GroupId { get; set; }
-        public string Text { get; set; }
     }
 }
