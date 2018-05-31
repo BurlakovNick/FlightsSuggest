@@ -29,7 +29,7 @@ namespace FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte
 
             return wall
                 .WallPosts
-                .Where(x => !x.IsPinned.Value)
+                .Where(x => !x.IsPinned.HasValue || !x.IsPinned.Value)
                 .Select(x => new VkWallPost(x.Id.Value, x.OwnerId.Value, x.Text, groupName, x.Date.Value))
                 .Take((int)count)
                 .ToArray();

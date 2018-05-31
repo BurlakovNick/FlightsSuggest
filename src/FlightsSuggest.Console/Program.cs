@@ -27,11 +27,11 @@ namespace FlightsSuggest.ConsoleApp
 
             vkontakteTimeline.Actualize();
 
-            Console.WriteLine(vkontakteTimeline.LatestOffset);
-            foreach (var line in vkontakteTimeline.ReadNews(0).Select(JsonConvert.SerializeObject))
-            {
-                Console.WriteLine(line);
-            }
+            var notificationSenders = new [] { new ConsoleNotificationSender(), };
+            var subscriber = new Subscriber("nick", null, false, new [] {new TermNotificationTrigger("Грец"), });
+            var notifier = new Notifier(notificationSenders, new [] { subscriber, }, new [] {vkontakteTimeline}, new FileOffsetStorage());
+
+            notifier.Notify();
         }
     }
 }
