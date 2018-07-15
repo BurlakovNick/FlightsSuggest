@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using VkNet;
-using VkNet.Model;
 using VkNet.Model.RequestParams;
 
 namespace FlightsSuggest.Core.Infrastructure.Vkontakte

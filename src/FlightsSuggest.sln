@@ -5,9 +5,11 @@ VisualStudioVersion = 15.0.27703.2042
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightsSuggest.Console", "FlightsSuggest.Console\FlightsSuggest.Console.csproj", "{346B0E92-1AD9-40E8-80BB-C029DD575E87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.AzureFunctions", "FlightsSuggest.AzureFunctions\FlightsSuggest.AzureFunctions.csproj", "{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightsSuggest.AzureFunctions", "FlightsSuggest.AzureFunctions\FlightsSuggest.AzureFunctions.csproj", "{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.Core", "FlightsSuggest.Core\FlightsSuggest.Core.csproj", "{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightsSuggest.Core", "FlightsSuggest.Core\FlightsSuggest.Core.csproj", "{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.Testing", "FlightsSuggest.Testing\FlightsSuggest.Testing.csproj", "{ED3E1A6E-FBBD-4229-BCEC-777FCEA92114}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED3E1A6E-FBBD-4229-BCEC-777FCEA92114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED3E1A6E-FBBD-4229-BCEC-777FCEA92114}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED3E1A6E-FBBD-4229-BCEC-777FCEA92114}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED3E1A6E-FBBD-4229-BCEC-777FCEA92114}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
