@@ -9,3 +9,6 @@ project.lock.json
 *.cache
 *.docstates
 
+.vs/
+flights/
+offsets/
