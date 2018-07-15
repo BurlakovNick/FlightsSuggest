@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightsSuggest.Console", "F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.AzureFunctions", "FlightsSuggest.AzureFunctions\FlightsSuggest.AzureFunctions.csproj", "{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.Core", "FlightsSuggest.Core\FlightsSuggest.Core.csproj", "{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F78C8A91-6EF8-448D-AE42-C86BD02A57F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

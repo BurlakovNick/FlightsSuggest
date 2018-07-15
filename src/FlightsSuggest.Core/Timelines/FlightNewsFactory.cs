@@ -1,6 +1,6 @@
-﻿using FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte;
+﻿using FlightsSuggest.Core.Infrastructure.Vkontakte;
 
-namespace FlightsSuggest.ConsoleApp.Timelines
+namespace FlightsSuggest.Core.Timelines
 {
     public class FlightNewsFactory : IFlightNewsFactory
     {

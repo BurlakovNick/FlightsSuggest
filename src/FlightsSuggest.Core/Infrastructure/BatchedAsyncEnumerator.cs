@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FlightsSuggest.ConsoleApp.Infrastructure
+namespace FlightsSuggest.Core.Infrastructure
 {
     public class BatchedAsyncEnumerator<TItem, TState> : IAsyncEnumerator<TItem>
     {

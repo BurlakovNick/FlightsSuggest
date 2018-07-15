@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlightsSuggest.ConsoleApp.Timelines
+namespace FlightsSuggest.Core.Timelines
 {
     public class FlightNews
     {

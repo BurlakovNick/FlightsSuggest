@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using VkNet;
+using VkNet.Model;
 using VkNet.Model.RequestParams;
 
-namespace FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte
+namespace FlightsSuggest.Core.Infrastructure.Vkontakte
 {
     public class VkontakteClient : IVkontakteClient
     {

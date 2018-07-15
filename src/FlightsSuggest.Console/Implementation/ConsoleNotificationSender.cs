@@ -1,8 +1,9 @@
 ﻿using System;
-using FlightsSuggest.ConsoleApp.Timelines;
+using FlightsSuggest.Core.Notifications;
+using FlightsSuggest.Core.Timelines;
 using Newtonsoft.Json;
 
-namespace FlightsSuggest.ConsoleApp.Notifications
+namespace FlightsSuggest.ConsoleApp.Implementation
 {
     public class ConsoleNotificationSender : INotificationSender
     {

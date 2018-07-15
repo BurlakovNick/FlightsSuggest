@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using FlightsSuggest.ConsoleApp.Infrastructure;
-using FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte;
-using FlightsSuggest.ConsoleApp.Notifications;
-using FlightsSuggest.ConsoleApp.Timelines;
+using FlightsSuggest.ConsoleApp.Implementation;
+using FlightsSuggest.Core.Infrastructure.Vkontakte;
+using FlightsSuggest.Core.Notifications;
+using FlightsSuggest.Core.Timelines;
 
 namespace FlightsSuggest.ConsoleApp
 {

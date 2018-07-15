@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using FlightsSuggest.ConsoleApp.Infrastructure;
+using FlightsSuggest.Core.Infrastructure;
 
-namespace FlightsSuggest.ConsoleApp.Timelines
+namespace FlightsSuggest.Core.Timelines
 {
     public interface ITimeline
     {

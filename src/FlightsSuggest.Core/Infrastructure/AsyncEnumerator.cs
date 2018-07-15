@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FlightsSuggest.ConsoleApp.Infrastructure
+namespace FlightsSuggest.Core.Infrastructure
 {
     public interface IAsyncEnumerator<T>
     {

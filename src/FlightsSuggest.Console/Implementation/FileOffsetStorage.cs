@@ -1,8 +1,9 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.Core.Infrastructure;
 
-namespace FlightsSuggest.ConsoleApp.Infrastructure
+namespace FlightsSuggest.ConsoleApp.Implementation
 {
     public class FileOffsetStorage : IOffsetStorage
     {

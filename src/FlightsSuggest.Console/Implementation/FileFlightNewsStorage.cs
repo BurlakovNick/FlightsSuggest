@@ -1,9 +1,10 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.Core.Timelines;
 using Newtonsoft.Json;
 
-namespace FlightsSuggest.ConsoleApp.Timelines
+namespace FlightsSuggest.ConsoleApp.Implementation
 {
     public class FileFlightNewsStorage : IFlightNewsStorage
     {

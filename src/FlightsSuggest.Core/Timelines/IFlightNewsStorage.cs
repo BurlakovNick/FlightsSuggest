@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FlightsSuggest.ConsoleApp.Timelines
+namespace FlightsSuggest.Core.Timelines
 {
     public interface IFlightNewsStorage
     {

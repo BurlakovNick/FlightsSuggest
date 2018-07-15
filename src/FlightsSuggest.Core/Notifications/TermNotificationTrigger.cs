@@ -1,6 +1,6 @@
-﻿using FlightsSuggest.ConsoleApp.Timelines;
+﻿using FlightsSuggest.Core.Timelines;
 
-namespace FlightsSuggest.ConsoleApp.Notifications
+namespace FlightsSuggest.Core.Notifications
 {
     public class TermNotificationTrigger : INotificationTrigger
     {

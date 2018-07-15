@@ -1,7 +1,7 @@
 ﻿using System;
-using FlightsSuggest.ConsoleApp.Timelines;
+using FlightsSuggest.Core.Timelines;
 
-namespace FlightsSuggest.ConsoleApp.Notifications
+namespace FlightsSuggest.Core.Notifications
 {
     public class TelegramNotificationSender : INotificationSender
     {

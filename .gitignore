@@ -14,7 +14,7 @@ flights/
 offsets/
 *.pubxml
 launchSettings.json
-
+*.dotSettings
 
 
 ## Ignore Visual Studio temporary files, build results, and

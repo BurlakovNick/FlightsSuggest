@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte
+namespace FlightsSuggest.Core.Infrastructure.Vkontakte
 {
     public class VkWallPost
     {

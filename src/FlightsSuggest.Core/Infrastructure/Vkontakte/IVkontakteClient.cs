@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte
+namespace FlightsSuggest.Core.Infrastructure.Vkontakte
 {
     public interface IVkontakteClient
     {

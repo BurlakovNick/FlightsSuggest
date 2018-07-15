@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using FlightsSuggest.ConsoleApp.Infrastructure;
-using FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte;
+using FlightsSuggest.Core.Infrastructure;
+using FlightsSuggest.Core.Infrastructure.Vkontakte;
 
-namespace FlightsSuggest.ConsoleApp.Timelines
+namespace FlightsSuggest.Core.Timelines
 {
     public class VkontakteTimeline : ITimeline
     {
