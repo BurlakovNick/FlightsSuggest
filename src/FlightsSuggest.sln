@@ -1,6 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.Console", "FlightsSuggest.Console\FlightsSuggest.Console.csproj", "{346B0E92-1AD9-40E8-80BB-C029DD575E87}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2042
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlightsSuggest.Console", "FlightsSuggest.Console\FlightsSuggest.Console.csproj", "{346B0E92-1AD9-40E8-80BB-C029DD575E87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightsSuggest.AzureFunctions", "FlightsSuggest.AzureFunctions\FlightsSuggest.AzureFunctions.csproj", "{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +17,15 @@ Global
 		{346B0E92-1AD9-40E8-80BB-C029DD575E87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{346B0E92-1AD9-40E8-80BB-C029DD575E87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{346B0E92-1AD9-40E8-80BB-C029DD575E87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC01D3F5-11C1-40B6-9153-0B92CA9B3DB6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F562836-DCCC-44E0-ADDB-CEDF39B18669}
 	EndGlobalSection
 EndGlobal
