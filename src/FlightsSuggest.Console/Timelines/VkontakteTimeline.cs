@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using FlightsSuggest.ConsoleApp.Infrastructure;
 using FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte;
 
@@ -32,10 +32,10 @@ namespace FlightsSuggest.ConsoleApp.Timelines
             batchSize = 100;
         }
 
-        public void Actualize()
+        public async Task ActualizeAsync()
         {
-            var offset = offsetStorage.Find(flightSource);
-            var latestOffset = vkontakteClient.GetPosts(vkGroupName, 0, 10)
+            var offset = await offsetStorage.FindAsync(flightSource);
+            var latestOffset = (await vkontakteClient.GetPostsAsync(vkGroupName, 0, 10))
                 .OrderByDescending(x => x.Date)
                 .First()
                 .Date
@@ -43,7 +43,7 @@ namespace FlightsSuggest.ConsoleApp.Timelines
 
             if (!offset.HasValue)
             {
-                offsetStorage.Write(flightSource, latestOffset);
+                await offsetStorage.WriteAsync(flightSource, latestOffset);
                 return;
             }
 
@@ -55,14 +55,14 @@ namespace FlightsSuggest.ConsoleApp.Timelines
             var skip = 0UL;
             while (true)
             {
-                var wallPosts = vkontakteClient.GetPosts(vkGroupName, skip, (ulong)batchSize)
+                var wallPosts = (await vkontakteClient.GetPostsAsync(vkGroupName, skip, (ulong)batchSize))
                     .OrderByDescending(x => x.Date)
                     .ToArray();
 
                 foreach (var wallPost in wallPosts.Where(x => x.Date.Ticks > offset))
                 {
                     var flightNews = flightNewsFactory.Create(wallPost, flightSource);
-                    flightNewsStorage.Write(flightNews);
+                    await flightNewsStorage.WriteAsync(flightNews);
                 }
 
                 if (wallPosts.Last().Date.Ticks <= offset)
@@ -73,28 +73,19 @@ namespace FlightsSuggest.ConsoleApp.Timelines
                 skip += (ulong) wallPosts.Length;
             }
 
-            offsetStorage.Write(flightSource, latestOffset);
+            await offsetStorage.WriteAsync(flightSource, latestOffset);
         }
 
-        public IEnumerable<FlightNews> ReadNews(long offset)
+        public IAsyncEnumerator<FlightNews> GetNewsEnumerator(long offset)
         {
-            while (true)
-            {
-                var flights = flightNewsStorage.Select(offset, batchSize, flightSource);
-                if (flights.Length == 0)
-                {
-                    break;
-                }
-
-                foreach (var flight in flights)
-                {
-                    yield return flight;
-                    offset = flight.Offset;
-                }
-            }
+            return new BatchedAsyncEnumerator<FlightNews, long>(
+                async currentOffset => await flightNewsStorage.SelectAsync(currentOffset, batchSize, flightSource),
+                flight => flight.Offset,
+                offset
+            );
         }
 
-        public long? LatestOffset => flightNewsStorage.FindLatestOffset(flightSource);
+        public Task<long?> GetLatestOffsetAsync() => flightNewsStorage.FindLatestOffsetAsync(flightSource);
 
         public string Name => "Vkontakte";
     }

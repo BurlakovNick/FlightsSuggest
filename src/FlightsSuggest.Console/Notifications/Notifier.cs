@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using FlightsSuggest.ConsoleApp.Infrastructure;
 using FlightsSuggest.ConsoleApp.Timelines;
 
@@ -24,7 +25,7 @@ namespace FlightsSuggest.ConsoleApp.Notifications
             this.offsetStorage = offsetStorage;
         }
 
-        public void Notify()
+        public async Task NotifyAsync()
         {
             foreach (var subscriber in subscribers)
             {
@@ -33,19 +34,26 @@ namespace FlightsSuggest.ConsoleApp.Notifications
                     foreach (var timeline in timelines)
                     {
                         var offsetId = $"{subscriber.Id}_{timeline.Name}";
-                        var offset = offsetStorage.Find(offsetId);
+                        var offset = await offsetStorage.FindAsync(offsetId);
                         if (offset == null)
                         {
-                            var latestOffset = timeline.LatestOffset;
+                            var latestOffset = await timeline.GetLatestOffsetAsync();
                             if (latestOffset.HasValue)
                             {
-                                offsetStorage.Write(offsetId, latestOffset.Value);
+                                await offsetStorage.WriteAsync(offsetId, latestOffset.Value);
                             }
                             continue;
                         }
 
-                        foreach (var flightNews in timeline.ReadNews(offset.Value))
+                        var flightEnumerator = timeline.GetNewsEnumerator(offset.Value);
+                        while (true)
                         {
+                            var (hasNext, flightNews) = await flightEnumerator.MoveNextAsync();
+                            if (!hasNext)
+                            {
+                                break;
+                            }
+
                             if (subscriber.ShouldNotify(flightNews))
                             {
                                 notificationSender.SendTo(subscriber, flightNews);

@@ -1,9 +1,11 @@
-﻿namespace FlightsSuggest.ConsoleApp.Timelines
+﻿using System.Threading.Tasks;
+
+namespace FlightsSuggest.ConsoleApp.Timelines
 {
     public interface IFlightNewsStorage
     {
-        void Write(FlightNews flight);
-        FlightNews[] Select(long offset, int count, string source);
-        long? FindLatestOffset(string source);
+        Task WriteAsync(FlightNews flight);
+        Task<FlightNews[]> SelectAsync(long offset, int count, string source);
+        Task<long?> FindLatestOffsetAsync(string source);
     }
 }

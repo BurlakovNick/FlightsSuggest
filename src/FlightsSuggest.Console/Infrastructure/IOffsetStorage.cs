@@ -1,8 +1,10 @@
-﻿namespace FlightsSuggest.ConsoleApp.Infrastructure
+﻿using System.Threading.Tasks;
+
+namespace FlightsSuggest.ConsoleApp.Infrastructure
 {
     public interface IOffsetStorage
     {
-        void Write(string id, long offset);
-        long? Find(string id);
+        Task WriteAsync(string id, long offset);
+        Task<long?> FindAsync(string id);
     }
 }

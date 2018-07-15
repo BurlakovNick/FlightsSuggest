@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FlightsSuggest.ConsoleApp.Infrastructure
 {
@@ -13,19 +14,19 @@ namespace FlightsSuggest.ConsoleApp.Infrastructure
             }
         }
 
-        public void Write(string id, long offset)
+        public Task WriteAsync(string id, long offset)
         {
-            File.WriteAllLines($"offsets/{id}", new [] {offset.ToString()});
+            return File.WriteAllLinesAsync($"offsets/{id}", new [] {offset.ToString()});
         }
 
-        public long? Find(string id)
+        public async Task<long?> FindAsync(string id)
         {
             if (!File.Exists($"offsets/{id}"))
             {
                 return null;
             }
 
-            var line = File.ReadAllLines($"offsets/{id}").First();
+            var line = (await File.ReadAllLinesAsync($"offsets/{id}")).First();
             return long.Parse(line);
         }
     }

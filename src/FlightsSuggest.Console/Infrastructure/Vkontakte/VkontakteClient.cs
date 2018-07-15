@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using VkNet;
 using VkNet.Model.RequestParams;
 
@@ -7,19 +8,20 @@ namespace FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte
 {
     public class VkontakteClient : IVkontakteClient
     {
-        private readonly Lazy<VkApi> client;
+        private readonly Lazy<Task<VkApi>> client;
 
         public VkontakteClient(
             ulong applicationId,
             string accessToken
         )
         {
-            client = new Lazy<VkApi>(() => CreateClient(applicationId, accessToken));
+            client = new Lazy<Task<VkApi>>(() => CreateClientAsync(applicationId, accessToken));
         }
 
-        public VkWallPost[] GetPosts(string groupName, ulong offset, ulong count)
+        public async Task<VkWallPost[]> GetPostsAsync(string groupName, ulong offset, ulong count)
         {
-            var wall = client.Value.Wall.Get(new WallGetParams
+            var vkClient = await client.Value;
+            var wall = await vkClient.Wall.GetAsync(new WallGetParams
             {
                 //note: 1 for pinned post
                 Count = count + 1,
@@ -35,11 +37,11 @@ namespace FlightsSuggest.ConsoleApp.Infrastructure.Vkontakte
                 .ToArray();
         }
 
-        private static VkApi CreateClient(ulong applicationId, string accessToken)
+        private static async Task<VkApi> CreateClientAsync(ulong applicationId, string accessToken)
         {
             var vkApi = new VkApi();
 
-            vkApi.Authorize(new ApiAuthParams
+            await vkApi.AuthorizeAsync(new ApiAuthParams
             {
                 ApplicationId = applicationId,
                 AccessToken = accessToken
