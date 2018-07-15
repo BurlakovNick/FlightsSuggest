@@ -35,7 +35,11 @@ namespace FlightsSuggest.ConsoleApp.Timelines
         public void Actualize()
         {
             var offset = offsetStorage.Find(flightSource);
-            var latestOffset = vkontakteClient.GetPosts(vkGroupName, 0, 1).First().Date.Ticks;
+            var latestOffset = vkontakteClient.GetPosts(vkGroupName, 0, 10)
+                .OrderByDescending(x => x.Date)
+                .First()
+                .Date
+                .Ticks;
 
             if (!offset.HasValue)
             {
