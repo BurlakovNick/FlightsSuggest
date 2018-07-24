@@ -17,18 +17,33 @@ namespace FlightsSuggest.ConsoleApp.Implementation
 
         public Task WriteAsync(string id, long offset)
         {
-            return File.WriteAllLinesAsync($"offsets/{id}", new [] {offset.ToString()});
+            var filename = GetFilename(id);
+            return File.WriteAllLinesAsync(filename, new [] {offset.ToString()});
         }
 
         public async Task<long?> FindAsync(string id)
         {
-            if (!File.Exists($"offsets/{id}"))
+            var filename = GetFilename(id);
+            if (!File.Exists(filename))
             {
                 return null;
             }
 
-            var line = (await File.ReadAllLinesAsync($"offsets/{id}")).First();
+            var line = (await File.ReadAllLinesAsync(filename)).First();
             return long.Parse(line);
         }
+
+        public Task DeleteAsync(string id)
+        {
+            var filename = GetFilename(id);
+            if (File.Exists(filename))
+            {
+                File.Delete(filename);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private static string GetFilename(string id) => $"offsets/{id}";
     }
 }

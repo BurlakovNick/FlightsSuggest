@@ -6,5 +6,6 @@ namespace FlightsSuggest.Core.Infrastructure
     {
         Task WriteAsync(string id, long offset);
         Task<long?> FindAsync(string id);
+        Task DeleteAsync(string id);
     }
 }

@@ -23,6 +23,7 @@ launchSettings.json
 
 # Azure Functions localsettings file
 local.settings.json
+settings.json
 
 # User-specific files
 *.suo

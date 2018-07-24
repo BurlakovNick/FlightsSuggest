@@ -8,12 +8,14 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 {
     public class FlightNotifier
     {
+        private readonly IFlightsConfiguration configuration;
         private readonly VkontakteClient vkontakteClient;
 
         public FlightNotifier(
             IFlightsConfiguration configuration
             )
         {
+            this.configuration = configuration;
             vkontakteClient = new VkontakteClient(configuration.VkApplicationId, configuration.VkAccessToken);
         }
 
@@ -21,9 +23,11 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
         public async Task NotifyAsync()
         {
+            var offsetStorage = new AzureTableOffsetStorage(configuration);
+
             var vkontakteTimeline = new VkontakteTimeline(
                 "vandroukiru",
-                new InMemoryOffsetStorage(),
+                offsetStorage,
                 new InMemoryFlightNewsStorage(),
                 vkontakteClient,
                 new FlightNewsFactory()
@@ -34,7 +38,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             var inMemoryNotificationSender = new InMemoryNotificationSender();
             var notificationSenders = new[] { inMemoryNotificationSender, };
             var subscriber = new Subscriber("nick", null, false, new[] { new TermNotificationTrigger("Греци"), });
-            var notifier = new Notifier(notificationSenders, new[] { subscriber, }, new[] { vkontakteTimeline }, new InMemoryOffsetStorage());
+            var notifier = new Notifier(notificationSenders, new[] { subscriber, }, new[] { vkontakteTimeline }, offsetStorage);
 
             await notifier.NotifyAsync();
             Sended = inMemoryNotificationSender.Sended;

@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
-using FlightsSuggest.AzureFunctions.Functions;
-using FlightsSuggest.Core.Configuration;
+using FlightsSuggest.AzureFunctions.Implementation;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace FlightsSuggest.Testing
 {
     [TestFixture]
-    public class FlightNotifierTest
+    public class FlightNotifierTest : TestBase
     {
         [Test]
         public async Task TestNotify()
         {
-            var configuration = ConfigurationProvider.ProvideLocal();
-            var flightNotifier = new FlightNotifier(configuration);
+            var flightNotifier = new FlightNotifier(Configuration);
             await flightNotifier.NotifyAsync();
             Console.WriteLine(JsonConvert.SerializeObject(flightNotifier.Sended, Formatting.Indented));
         }

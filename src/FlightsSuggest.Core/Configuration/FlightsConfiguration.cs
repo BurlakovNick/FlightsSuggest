@@ -15,5 +15,6 @@ namespace FlightsSuggest.Core.Configuration
 
         public ulong VkApplicationId => ulong.Parse(configuration["VkApplicationId"]);
         public string VkAccessToken => configuration["VkAccessToken"];
+        public string AzureTableConnectionString => configuration["AzureTableConnectionString"];
     }
 }

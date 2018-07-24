@@ -4,5 +4,6 @@ namespace FlightsSuggest.Core.Configuration
     {
         ulong VkApplicationId { get; }
         string VkAccessToken { get; }
+        string AzureTableConnectionString { get; }
     }
 }
