@@ -9,6 +9,6 @@ namespace FlightsSuggest.Core.Timelines
         public string Url { get; set; }
         public string Text { get; set; }
         public string Source { get; set; }
-        public long Offset { get; set; }
+        public long Offset => Date.Ticks;
     }
 }

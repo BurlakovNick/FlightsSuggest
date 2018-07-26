@@ -33,6 +33,11 @@ namespace FlightsSuggest.ConsoleApp.Implementation
             }
         }
 
+        public Task DeleteAsync(FlightNews flight)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public async Task<FlightNews[]> SelectAsync(long offset, int count, string source)
         {
             var filename = GetFilename(source);

@@ -10,7 +10,6 @@ namespace FlightsSuggest.Core.Timelines
             {
                 Id = vkWallPost.Id.ToString(),
                 Date = vkWallPost.Date,
-                Offset = vkWallPost.Date.Ticks,
                 Source = source,
                 Text = vkWallPost.Text,
                 Url = vkWallPost.Url

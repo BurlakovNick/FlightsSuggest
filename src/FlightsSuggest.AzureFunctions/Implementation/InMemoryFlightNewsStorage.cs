@@ -20,6 +20,12 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return Task.CompletedTask;
         }
 
+        public Task DeleteAsync(FlightNews flight)
+        {
+            GetStorage(flight.Source).TryRemove(flight.Id, out var _);
+            return Task.CompletedTask;
+        }
+
         public Task<FlightNews[]> SelectAsync(long offset, int count, string source)
         {
             var result = GetStorage(source)

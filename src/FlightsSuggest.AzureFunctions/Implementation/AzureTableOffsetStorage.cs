@@ -1,7 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
-using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 
 namespace FlightsSuggest.AzureFunctions.Implementation
@@ -12,34 +12,23 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
         public AzureTableOffsetStorage(IFlightsConfiguration flightsConfiguration)
         {
-            var storageAccount = CloudStorageAccount.Parse(flightsConfiguration.AzureTableConnectionString);
-            var tableClient = storageAccount.CreateCloudTableClient();
-            offsetsTable = tableClient.GetTableReference("Offsets");
-            offsetsTable.CreateIfNotExistsAsync().Wait();
+            offsetsTable = flightsConfiguration.GetAzureTableAsync("Offsets").Result;
         }
 
         public Task WriteAsync(string id, long offset)
         {
-            var offsetDbo = new OffsetDbo(id, offset);
-            return offsetsTable.ExecuteAsync(TableOperation.InsertOrReplace(offsetDbo));
+            return offsetsTable.WriteAsync(new OffsetDbo(id, offset));
         }
 
-        public async Task DeleteAsync(string id)
+        public Task DeleteAsync(string id)
         {
-            var result = await offsetsTable.ExecuteAsync(TableOperation.Retrieve<OffsetDbo>(id, id));
-            if (result.Result == null)
-            {
-                return;
-            }
-
-            await offsetsTable.ExecuteAsync(TableOperation.Delete((ITableEntity) result.Result));
+            return offsetsTable.DeleteAsync<OffsetDbo>(id, id);
         }
 
         public async Task<long?> FindAsync(string id)
         {
-            var result = await offsetsTable.ExecuteAsync(TableOperation.Retrieve<OffsetDbo>(id, id));
-            var dbo = (OffsetDbo)result.Result;
-            return dbo?.Offset;
+            var offset = await offsetsTable.FindAsync<OffsetDbo>(id, id);
+            return offset?.Offset;
         }
 
         public class OffsetDbo : TableEntity
@@ -52,8 +41,10 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             {
                 Id = id;
                 Offset = offset;
+
                 RowKey = id;
                 PartitionKey = id;
+                Timestamp = DateTimeOffset.UtcNow;
             }
 
             public string Id { get; set; }
