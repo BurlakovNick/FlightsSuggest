@@ -87,6 +87,13 @@ namespace FlightsSuggest.Core.Timelines
 
         public Task<long?> GetLatestOffsetAsync() => flightNewsStorage.FindLatestOffsetAsync(flightSource);
 
+        public Task WriteOffsetAsync(long offset)
+        {
+            return offsetStorage.WriteAsync(flightSource, offset);
+        }
+
         public string Name => "Vkontakte";
+
+        public string VkGroupName => vkGroupName;
     }
 }

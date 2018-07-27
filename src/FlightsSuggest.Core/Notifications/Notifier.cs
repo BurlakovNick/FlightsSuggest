@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Timelines;
@@ -33,7 +35,7 @@ namespace FlightsSuggest.Core.Notifications
                 {
                     foreach (var timeline in timelines)
                     {
-                        var offsetId = $"{subscriber.Id}_{timeline.Name}";
+                        var offsetId = GetOffsetId(subscriber.Id, timeline.Name);
                         var offset = await offsetStorage.FindAsync(offsetId);
                         if (offset == null)
                         {
@@ -63,5 +65,33 @@ namespace FlightsSuggest.Core.Notifications
                 }
             }
         }
+
+        public Task RewindOffsetAsync(string subscriberId, string timelineName, long offset)
+        {
+            var offsetId = GetOffsetId(subscriberId, timelineName);
+            return offsetStorage.WriteAsync(offsetId, offset);
+        }
+
+        public async Task<(string timelineName, DateTime? offset)[]> SelectOffsetsAsync(string subscriberId)
+        {
+            var result = new List<(string, DateTime?)>();
+            foreach (var timeline in timelines)
+            {
+                var offsetId = GetOffsetId(subscriberId, timeline.Name);
+                var offset = await offsetStorage.FindAsync(offsetId);
+                if (offset.HasValue)
+                {
+                    result.Add((timeline.Name, new DateTime(offset.Value)));
+                }
+                else
+                {
+                    result.Add((timeline.Name, null));
+                }
+            }
+
+            return result.ToArray();
+        }
+
+        private static string GetOffsetId(string subscriberId, string timelineName) => $"{subscriberId}_{timelineName}";
     }
 }
