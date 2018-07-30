@@ -83,7 +83,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             vkontakteTimeline = new VkontakteTimeline(
                 "vandroukiru",
                 offsetStorage,
-                new InMemoryFlightNewsStorage(),
+                new AzureTableFlightNewsStorage(configuration), 
                 vkontakteClient,
                 new FlightNewsFactory()
             );
