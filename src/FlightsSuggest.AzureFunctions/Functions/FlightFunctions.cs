@@ -67,6 +67,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var configuration = ConfigurationProvider.Provide(context);
                 var flightNotifier = new FlightNotifier(configuration);
                 await flightNotifier.RewindVkOffsetAsync(vkGroup, offset);
+
                 return new OkObjectResult("done");
             });
         }

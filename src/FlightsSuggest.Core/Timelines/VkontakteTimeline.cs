@@ -85,7 +85,7 @@ namespace FlightsSuggest.Core.Timelines
             );
         }
 
-        public Task<long?> GetLatestOffsetAsync() => flightNewsStorage.FindLatestOffsetAsync(flightSource);
+        public Task<long?> GetLatestOffsetAsync() => offsetStorage.FindAsync(flightSource);
 
         public Task WriteOffsetAsync(long offset)
         {
