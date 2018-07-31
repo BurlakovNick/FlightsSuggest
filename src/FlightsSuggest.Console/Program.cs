@@ -24,7 +24,7 @@ namespace FlightsSuggest.ConsoleApp
             await vkontakteTimeline.ActualizeAsync();
 
             var notificationSenders = new [] { new ConsoleNotificationSender(), };
-            var subscriber = new Subscriber("nick", null, false, new [] {new TermNotificationTrigger("Грец"), });
+            var subscriber = new Subscriber("nick", null, 45921723, false, new [] {new TermNotificationTrigger("Грец"), });
             var notifier = new Notifier(notificationSenders, new [] { subscriber, }, new [] {vkontakteTimeline}, new FileOffsetStorage());
 
             await notifier.NotifyAsync();

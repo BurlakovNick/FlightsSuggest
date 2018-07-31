@@ -15,7 +15,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
         private readonly VkontakteClient vkontakteClient;
         private VkontakteTimeline vkontakteTimeline;
         private Notifier notifier;
-        private InMemoryNotificationSender inMemoryNotificationSender;
+        private INotificationSender telegramNotificationSender;
 
         public FlightNotifier(
             IFlightsConfiguration configuration
@@ -32,7 +32,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
         {
             await vkontakteTimeline.ActualizeAsync();
             await notifier.NotifyAsync();
-            Sended = inMemoryNotificationSender.Sended;
+            Sended = telegramNotificationSender.Sended;
         }
 
         public Task RewindSubscriberOffsetAsync(string subscriberId, string timelineName, long offset)
@@ -88,9 +88,9 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 new FlightNewsFactory()
             );
 
-            inMemoryNotificationSender = new InMemoryNotificationSender();
-            var notificationSenders = new[] { inMemoryNotificationSender, };
-            var subscriber = new Subscriber("nick", null, false, new[] { new TermNotificationTrigger("Греци"), });
+            telegramNotificationSender = new TelegramNotificationSender(configuration);
+            var notificationSenders = new[] { telegramNotificationSender, };
+            var subscriber = new Subscriber("nick", null, 45921723, true, new[] { new TermNotificationTrigger("Греци"), });
             notifier = new Notifier(notificationSenders, new[] { subscriber, }, new[] { vkontakteTimeline }, offsetStorage);
         }
     }

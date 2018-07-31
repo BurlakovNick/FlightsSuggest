@@ -6,5 +6,6 @@ namespace FlightsSuggest.Core.Notifications
     {
         bool CanSend(Subscriber subscriber);
         void SendTo(Subscriber subscriber, FlightNews flightNews);
+        FlightNews[] Sended { get; }
     }
 }

@@ -10,6 +10,7 @@ namespace FlightsSuggest.Core.Notifications
         public Subscriber(
             string id,
             string telegramUsername,
+            int? telegramChatId,
             bool sendTelegramMessages,
             INotificationTrigger[] notificationTriggers
             )
@@ -18,11 +19,13 @@ namespace FlightsSuggest.Core.Notifications
             Id = id;
             TelegramUsername = telegramUsername;
             SendTelegramMessages = sendTelegramMessages;
+            TelegramChatId = telegramChatId;
         }
 
         public string Id { get; }
         public string TelegramUsername { get; }
         public bool SendTelegramMessages { get; }
+        public int? TelegramChatId { get; }
 
         public bool ShouldNotify(FlightNews flightNews)
         {
