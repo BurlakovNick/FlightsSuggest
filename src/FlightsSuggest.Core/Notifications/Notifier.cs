@@ -60,6 +60,8 @@ namespace FlightsSuggest.Core.Notifications
                             {
                                 notificationSender.SendTo(subscriber, flightNews);
                             }
+
+                            await offsetStorage.WriteAsync(offsetId, flightNews.Offset);
                         }
                     }
                 }
