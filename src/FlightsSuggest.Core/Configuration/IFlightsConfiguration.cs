@@ -6,5 +6,6 @@ namespace FlightsSuggest.Core.Configuration
         string VkAccessToken { get; }
         string AzureTableConnectionString { get; }
         string TelegramBotToken { get; }
+        string TelegramMagicWords { get; }
     }
 }

@@ -53,5 +53,25 @@ namespace FlightsSuggest.AzureFunctions.Functions
             log.Info($"Finish {funcName} function");
             return result;
         }
+
+        public static async Task ExecuteTimerAsync(
+            TraceWriter log,
+            string funcName,
+            Func<Task> func
+        )
+        {
+            log.Info($"Lets execute {funcName} function");
+
+            try
+            {
+                await func();
+            }
+            catch (Exception exception)
+            {
+                log.Error($"Exception: {exception.Message}, StackTrace: {exception.StackTrace}");
+            }
+
+            log.Info($"Finish {funcName} function");
+        }
     }
 }

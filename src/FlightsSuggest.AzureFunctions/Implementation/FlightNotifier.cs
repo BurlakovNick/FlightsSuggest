@@ -6,6 +6,7 @@ using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
 using FlightsSuggest.Core.Timelines;
+using Telegram.Bot;
 
 namespace FlightsSuggest.AzureFunctions.Implementation
 {
@@ -16,6 +17,8 @@ namespace FlightsSuggest.AzureFunctions.Implementation
         private VkontakteTimeline vkontakteTimeline;
         private Notifier notifier;
         private INotificationSender telegramNotificationSender;
+        private SubscriberStorage subscriberStorage;
+        private AzureTableOffsetStorage offsetStorage;
 
         public FlightNotifier(
             IFlightsConfiguration configuration
@@ -51,6 +54,11 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             await timeline.WriteOffsetAsync(offset);
         }
 
+        public Task<Subscriber[]> SelectSubscribersAsync()
+        {
+            return subscriberStorage.SelectAllAsync();
+        }
+
         public Task<(string timelineName, DateTime? offset)[]> SelectOffsetsAsync(string subscriberId)
         {
             return notifier.SelectOffsetsAsync(subscriberId);
@@ -76,9 +84,62 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return result.ToArray();
         }
 
+        public Task CreateSubscriberAsync(string telegramUsername)
+        {
+            return subscriberStorage.CreateAsync(telegramUsername);
+        }
+
+        public async Task<string[]> RegisterNewSubscribers()
+        {
+            var botClient = new TelegramBotClient(configuration.TelegramBotToken);
+
+            const string botOffsetKey = "telegram_bot_offset";
+            var telegramBotOffset = ((int?)await offsetStorage.FindAsync(botOffsetKey)) ?? 0;
+            var subscribers = (await subscriberStorage.SelectAllAsync()).ToDictionary(x => x.TelegramUsername);
+            var updated = new List<string>();
+
+            while (true)
+            {
+                var updates = await botClient.GetUpdatesAsync(telegramBotOffset, limit: 100);
+                if (updates.Length == 0)
+                {
+                    break;
+                }
+
+                foreach (var update in updates
+                    .Where(x => x.Message?.Text != null)
+                    .Where(x => x.Message.Text.ToLower().Contains(configuration.TelegramMagicWords))
+                )
+                {
+                    var telegramUsername = update.Message.Chat.Username;
+                    var telegramChatId = update.Message.Chat.Id;
+
+                    if (subscribers.TryGetValue(telegramUsername, out var subscriber) &&
+                        subscriber.TelegramChatId.HasValue)
+                    {
+                        continue;
+                    }
+
+                    if (subscriber == null)
+                    {
+                        subscriber = await subscriberStorage.CreateAsync(telegramUsername);
+                    }
+
+                    subscriber = await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, telegramChatId);
+                    updated.Add(telegramUsername);
+                }
+
+                telegramBotOffset = updates.Last().Id + 1;
+            }
+
+            await offsetStorage.WriteAsync(botOffsetKey, telegramBotOffset);
+
+            return updated.ToArray();
+        }
+
         private void Init()
         {
-            var offsetStorage = new AzureTableOffsetStorage(configuration);
+            offsetStorage = new AzureTableOffsetStorage(configuration);
 
             vkontakteTimeline = new VkontakteTimeline(
                 "vandroukiru",
@@ -89,9 +150,12 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             );
 
             telegramNotificationSender = new TelegramNotificationSender(configuration);
+            subscriberStorage = new SubscriberStorage(configuration);
+
             var notificationSenders = new[] { telegramNotificationSender, };
-            var subscriber = new Subscriber("nick", null, 45921723, true, new[] { new TermNotificationTrigger("Греци"), });
-            notifier = new Notifier(notificationSenders, new[] { subscriber, }, new[] { vkontakteTimeline }, offsetStorage);
+            var subscribers = subscriberStorage.SelectAllAsync().Result;
+
+            notifier = new Notifier(notificationSenders, subscribers, new[] { vkontakteTimeline }, offsetStorage);
         }
     }
 }

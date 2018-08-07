@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.AzureFunctions.Implementation;
 using NUnit.Framework;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -9,6 +10,15 @@ namespace FlightsSuggest.Testing
     [TestFixture]
     public class TelegramClientTest : TestBase
     {
+        [Test]
+        [Ignore("Only for manual run")]
+        public async Task TestRegisterNewSubscribers()
+        {
+            var flightNotifier = new FlightNotifier(Configuration);
+
+            await flightNotifier.RegisterNewSubscribers();
+        }
+
         [Test]
         public async Task TestSendMessageAsync()
         {

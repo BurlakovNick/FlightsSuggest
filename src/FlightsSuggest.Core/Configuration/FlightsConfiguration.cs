@@ -17,5 +17,6 @@ namespace FlightsSuggest.Core.Configuration
         public string VkAccessToken => configuration["VkAccessToken"];
         public string AzureTableConnectionString => configuration["AzureTableConnectionString"];
         public string TelegramBotToken => configuration["TelegramBotToken"];
+        public string TelegramMagicWords => configuration["TelegramMagicWords"];
     }
 }
