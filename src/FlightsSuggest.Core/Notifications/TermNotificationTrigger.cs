@@ -15,5 +15,10 @@ namespace FlightsSuggest.Core.Notifications
         {
             return flightNews.Text.Contains(term);
         }
+
+        public string Serialize()
+        {
+            return term;
+        }
     }
 }
