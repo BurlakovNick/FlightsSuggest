@@ -6,7 +6,9 @@ using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
 using FlightsSuggest.Core.Timelines;
-using Telegram.Bot;
+using Microsoft.Azure.WebJobs.Host;
+using Newtonsoft.Json;
+using Telegram.Bot.Types;
 
 namespace FlightsSuggest.AzureFunctions.Implementation
 {
@@ -89,52 +91,40 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return subscriberStorage.CreateAsync(telegramUsername);
         }
 
-        public async Task<string[]> RegisterNewSubscribers()
+        public async Task ProcessTelegramUpdateAsync(Update update, TraceWriter log)
         {
-            var botClient = new TelegramBotClient(configuration.TelegramBotToken);
+            log.Info($"Received update: {JsonConvert.SerializeObject(update)}");
 
-            const string botOffsetKey = "telegram_bot_offset";
-            var telegramBotOffset = ((int?)await offsetStorage.FindAsync(botOffsetKey)) ?? 0;
-            var subscribers = (await subscriberStorage.SelectAllAsync()).ToDictionary(x => x.TelegramUsername);
-            var updated = new List<string>();
-
-            while (true)
+            if (update.Message?.Text == null)
             {
-                var updates = await botClient.GetUpdatesAsync(telegramBotOffset, limit: 100);
-                if (updates.Length == 0)
-                {
-                    break;
-                }
-
-                foreach (var update in updates
-                    .Where(x => x.Message?.Text != null)
-                    .Where(x => x.Message.Text.ToLower().Contains(configuration.TelegramMagicWords))
-                )
-                {
-                    var telegramUsername = update.Message.Chat.Username;
-                    var telegramChatId = update.Message.Chat.Id;
-
-                    if (subscribers.TryGetValue(telegramUsername, out var subscriber) &&
-                        subscriber.TelegramChatId.HasValue)
-                    {
-                        continue;
-                    }
-
-                    if (subscriber == null)
-                    {
-                        subscriber = await subscriberStorage.CreateAsync(telegramUsername);
-                    }
-
-                    subscriber = await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, telegramChatId);
-                    updated.Add(telegramUsername);
-                }
-
-                telegramBotOffset = updates.Last().Id + 1;
+                log.Info("Message text is null, quiting");
+                return;
             }
 
-            await offsetStorage.WriteAsync(botOffsetKey, telegramBotOffset);
+            if (update.Message.Text.ToLower().Contains(configuration.TelegramMagicWords))
+            {
+                log.Info("Seen magic words, creating new subscriber");
 
-            return updated.ToArray();
+                var telegramUsername = update.Message.Chat.Username;
+                var telegramChatId = update.Message.Chat.Id;
+
+                var subscribers = (await subscriberStorage.SelectAllAsync()).ToDictionary(x => x.TelegramUsername);
+
+                if (subscribers.TryGetValue(telegramUsername, out var subscriber) &&
+                    subscriber.TelegramChatId.HasValue)
+                {
+                    log.Info("Subscriber already created");
+                    return;
+                }
+
+                if (subscriber == null)
+                {
+                    subscriber = await subscriberStorage.CreateAsync(telegramUsername);
+                }
+
+                await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, telegramChatId);
+                return;
+            }
         }
 
         private void Init()

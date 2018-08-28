@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
 using Microsoft.AspNetCore.Http;
@@ -5,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Newtonsoft.Json;
+using Telegram.Bot.Types;
 
 namespace FlightsSuggest.AzureFunctions.Functions
 {
@@ -50,23 +53,33 @@ namespace FlightsSuggest.AzureFunctions.Functions
             });
         }
 
-        [FunctionName("RegisterNewSubscribers")]
-        public static Task RegisterNewSubscribersAsync(
-            //Every hour - temp
-            [TimerTrigger("0 0 * * * *", RunOnStartup = false)]TimerInfo myTimer,
+        [FunctionName("ReceiveTelegramUpdate")]
+        public static Task ReceiveTelegramUpdateAsync(
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+            HttpRequest req,
             TraceWriter log,
             ExecutionContext context
         )
         {
-            return Function.ExecuteTimerAsync(log, nameof(RegisterNewSubscribersAsync), async () =>
+            return Function.ExecuteAsync(log, nameof(ReceiveTelegramUpdateAsync), async () =>
             {
                 var configuration = ConfigurationProvider.Provide(context);
                 var flightNotifier = new FlightNotifier(configuration);
+                var update = await DeserializeMessageAsync();
 
-                var updated = await flightNotifier.RegisterNewSubscribers();
+                await flightNotifier.ProcessTelegramUpdateAsync(update, log);
 
-                log.Info($"Updated = {string.Join(";", updated)}");
+                return new OkObjectResult("ok");
             });
+
+            async Task<Update> DeserializeMessageAsync()
+            {
+                using (var streamReader = new StreamReader(req.Body))
+                {
+                    var bytes = await streamReader.ReadToEndAsync();
+                    return JsonConvert.DeserializeObject<Update>(bytes);
+                }
+            }
         }
     }
 }

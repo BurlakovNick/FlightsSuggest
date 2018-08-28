@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Telegram.Bot;
 
 namespace FlightsSuggest.AzureFunctions.Functions
 {
@@ -127,6 +129,31 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var flightNotifier = new FlightNotifier(configuration);
 
                 await flightNotifier.CreateSubscriberAsync(telegramUsername);
+
+                return new OkObjectResult("done");
+            });
+        }
+
+        [FunctionName("SetTelegramWebhook")]
+        public static Task<IActionResult> SetTelegramWebhookAsync(
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+            HttpRequest req,
+            TraceWriter log,
+            ExecutionContext context
+        )
+        {
+            return Function.ExecuteAsync(log, nameof(SetTelegramWebhookAsync), async () =>
+            {
+                string url;
+                using (var streamReader = new StreamReader(req.Body))
+                {
+                    url = await streamReader.ReadToEndAsync();
+                }
+
+                var configuration = ConfigurationProvider.Provide(context);
+                var telegramBotClient = new TelegramBotClient(configuration.TelegramBotToken);
+
+                await telegramBotClient.SetWebhookAsync(url);
 
                 return new OkObjectResult("done");
             });
