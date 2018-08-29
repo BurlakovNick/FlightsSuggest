@@ -43,7 +43,8 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                     Date = new DateTime(dbo.DateTicks),
                     Source = dbo.Source,
                     Url = dbo.Url,
-                    Text = dbo.Text
+                    Text = dbo.Text,
+                    NormalizedText = dbo.Text.ToLower()
                 })
                 .ToArray();
         }

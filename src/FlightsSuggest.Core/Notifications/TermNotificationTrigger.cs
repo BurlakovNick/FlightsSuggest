@@ -13,7 +13,7 @@ namespace FlightsSuggest.Core.Notifications
 
         public bool ShouldNotify(FlightNews flightNews)
         {
-            return flightNews.Text.Contains(term);
+            return flightNews.NormalizedText.Contains(term);
         }
 
         public string Serialize()

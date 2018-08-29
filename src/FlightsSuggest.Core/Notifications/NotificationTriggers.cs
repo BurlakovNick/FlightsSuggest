@@ -8,13 +8,19 @@ namespace FlightsSuggest.Core.Notifications
     {
         public static (INotificationTrigger result, bool success, string message) BuildFromText(string text)
         {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return (new EmptyTrigger(), true, "empty");
+            }
+
             var normalizedText = new string(text.Where(c => !char.IsWhiteSpace(c)).ToArray());
+
             var input = new Input(normalizedText);
             var parser = Expr;
             var parsed = parser(input);
             if (!parsed.WasSuccessful)
             {
-                return (null, false, $"Can't parse expression. Message: {parsed.Message}, Offset: {parsed.Remainder}");
+                return (null, false, $"{parsed.Message}, Offset: {parsed.Remainder}");
             }
             return (parsed.Value, true, string.Empty);
         }

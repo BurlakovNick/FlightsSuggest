@@ -18,5 +18,7 @@ namespace FlightsSuggest.Core.Configuration
         public string AzureTableConnectionString => configuration["AzureTableConnectionString"];
         public string TelegramBotToken => configuration["TelegramBotToken"];
         public string TelegramMagicWords => configuration["TelegramMagicWords"];
+        public string TelegramSearchSettingWords => configuration["TelegramSearchSettingWords"];
+        public string TelegramLastNewsFormat => configuration["TelegramLastNewsFormat"];
     }
 }

@@ -12,6 +12,7 @@ namespace FlightsSuggest.Core.Timelines
                 Date = vkWallPost.Date,
                 Source = source,
                 Text = vkWallPost.Text,
+                NormalizedText = vkWallPost.Text.ToLower(),
                 Url = vkWallPost.Url
             };
         }

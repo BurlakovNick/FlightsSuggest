@@ -7,5 +7,7 @@ namespace FlightsSuggest.Core.Configuration
         string AzureTableConnectionString { get; }
         string TelegramBotToken { get; }
         string TelegramMagicWords { get; }
+        string TelegramSearchSettingWords { get; }
+        string TelegramLastNewsFormat { get; }
     }
 }

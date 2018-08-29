@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Notifications;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 
 namespace FlightsSuggest.AzureFunctions.Implementation
 {
     public class SubscriberStorage : ISubscriberStorage
     {
         private const string GlobalPartitionKey = "subscribers";
-        private static readonly INotificationTrigger[] FakeTriggers = new[] {new TermNotificationTrigger("Греци"),};
 
         private readonly CloudTable subscribersTable;
 
@@ -28,7 +28,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             }
 
             var id = Guid.NewGuid().ToString();
-            var subscriber = new Subscriber(id, telegramUsername, null, false, FakeTriggers);
+            var subscriber = new Subscriber(id, telegramUsername, null, false, new EmptyTrigger());
             await subscribersTable.WriteAsync(new SubscriberDbo(subscriber));
             return subscriber;
         }
@@ -49,6 +49,21 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return Convert(subscriber);
         }
 
+        public async Task<Subscriber> UpdateNotificationTriggerAsync(string subscriberId, INotificationTrigger trigger)
+        {
+            var subscriber = await subscribersTable.FindAsync<SubscriberDbo>(GlobalPartitionKey, subscriberId);
+            if (subscriber == null)
+            {
+                return null;
+            }
+
+            subscriber.SearchSettings = trigger.Serialize();
+
+            await subscribersTable.WriteAsync(subscriber);
+
+            return Convert(subscriber);
+        }
+
         public async Task<Subscriber[]> SelectAllAsync()
         {
             var dbos = await subscribersTable.SelectAsync<SubscriberDbo>(GlobalPartitionKey, String.Empty, 1000);
@@ -63,9 +78,14 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return subscribers.FirstOrDefault(x => x.TelegramUsername == telegramUsername);
         }
 
-        private static Subscriber Convert(SubscriberDbo x)
+        private static Subscriber Convert(SubscriberDbo dbo)
         {
-            return new Subscriber(x.Id, x.TelegramUsername, x.TelegramChatId, x.SendTelegramMessages, FakeTriggers);
+            var trigger = NotificationTriggers.BuildFromText(dbo.SearchSettings);
+            if (!trigger.success)
+            {
+                throw new InvalidOperationException($"Can't parse setting for subscriber {JsonConvert.SerializeObject(dbo)}");
+            }
+            return new Subscriber(dbo.Id, dbo.TelegramUsername, dbo.TelegramChatId, dbo.SendTelegramMessages, trigger.result);
         }
 
         class SubscriberDbo : TableEntity
@@ -83,12 +103,14 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 TelegramUsername = subscriber.TelegramUsername;
                 SendTelegramMessages = subscriber.SendTelegramMessages;
                 TelegramChatId = subscriber.TelegramChatId;
+                SearchSettings = subscriber.NotificationTrigger.Serialize();
             }
 
             public string Id { get; set;  }
             public string TelegramUsername { get; set; }
             public bool SendTelegramMessages { get; set; }
             public long? TelegramChatId { get; set; }
+            public string SearchSettings { get; set; }
         }
     }
 }

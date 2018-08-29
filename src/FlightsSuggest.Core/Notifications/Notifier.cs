@@ -31,38 +31,43 @@ namespace FlightsSuggest.Core.Notifications
         {
             foreach (var subscriber in subscribers)
             {
-                foreach (var notificationSender in senders.Where(s => s.CanSend(subscriber)))
+                await NotifyAsync(subscriber);
+            }
+        }
+
+        public async Task NotifyAsync(Subscriber subscriber)
+        {
+            foreach (var notificationSender in senders.Where(s => s.CanSend(subscriber)))
+            {
+                foreach (var timeline in timelines)
                 {
-                    foreach (var timeline in timelines)
+                    var offsetId = GetOffsetId(subscriber.Id, timeline.Name);
+                    var offset = await offsetStorage.FindAsync(offsetId);
+                    if (offset == null)
                     {
-                        var offsetId = GetOffsetId(subscriber.Id, timeline.Name);
-                        var offset = await offsetStorage.FindAsync(offsetId);
-                        if (offset == null)
+                        var latestOffset = await timeline.GetLatestOffsetAsync();
+                        if (latestOffset.HasValue)
                         {
-                            var latestOffset = await timeline.GetLatestOffsetAsync();
-                            if (latestOffset.HasValue)
-                            {
-                                await offsetStorage.WriteAsync(offsetId, latestOffset.Value);
-                            }
-                            continue;
+                            await offsetStorage.WriteAsync(offsetId, latestOffset.Value);
+                        }
+                        continue;
+                    }
+
+                    var flightEnumerator = timeline.GetNewsEnumerator(offset.Value);
+                    while (true)
+                    {
+                        var (hasNext, flightNews) = await flightEnumerator.MoveNextAsync();
+                        if (!hasNext)
+                        {
+                            break;
                         }
 
-                        var flightEnumerator = timeline.GetNewsEnumerator(offset.Value);
-                        while (true)
+                        if (subscriber.ShouldNotify(flightNews))
                         {
-                            var (hasNext, flightNews) = await flightEnumerator.MoveNextAsync();
-                            if (!hasNext)
-                            {
-                                break;
-                            }
-
-                            if (subscriber.ShouldNotify(flightNews))
-                            {
-                                notificationSender.SendTo(subscriber, flightNews);
-                            }
-
-                            await offsetStorage.WriteAsync(offsetId, flightNews.Offset);
+                            notificationSender.SendTo(subscriber, flightNews);
                         }
+
+                        await offsetStorage.WriteAsync(offsetId, flightNews.Offset);
                     }
                 }
             }
