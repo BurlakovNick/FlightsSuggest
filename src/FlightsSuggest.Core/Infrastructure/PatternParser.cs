@@ -26,5 +26,7 @@ namespace FlightsSuggest.Core.Infrastructure
 
             return (int.Parse(parseResult.Value), true, string.Empty);
         }
+
+        public static string ReplacePatternWithInt(string format, int value) => format.Replace("{int}", value.ToString());
     }
 }

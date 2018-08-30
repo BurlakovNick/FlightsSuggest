@@ -11,6 +11,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace FlightsSuggest.AzureFunctions.Implementation
 {
@@ -126,6 +127,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 }
 
                 await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, telegramChatId);
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Привет, подписчик!");
                 return;
             }
 
@@ -149,6 +151,55 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 }
 
                 await subscriberStorage.UpdateNotificationTriggerAsync(subscriber.Id, trigger.result);
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Принято, босс! Теперь бот будет присылать только новости с такими словами");
+
+                return;
+            }
+
+            if (message == configuration.TelegramSearchSettingRequestWords)
+            {
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    "Чтобы настроить поиск, нужно послать боту сообщение в таком формате:");
+
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    $"{configuration.TelegramSearchSettingWords} [Дублин, Майорка, Вена]");
+
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    "Бот будет искать новости, в тексте который есть слова 'Дублин', 'Майорка' или 'Вена'");
+
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    "Если хочешь, чтобы обязательно встретилось несколько слов, можешь обернуть их в круглые скобки:");
+
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    $"{configuration.TelegramSearchSettingWords} (Тайланд, дешево)");
+
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    "Условия можно комбинировать как тебе захочется! Например, если хочешь полететь в Тайланд дешево или в Дублин дорого, сделай так:");
+
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                    $"{configuration.TelegramSearchSettingWords} [(Тайланд, дешево), (Дублин, дорого)]");
+
+                return;
+            }
+
+            if (message == configuration.TelegramLastNewsRequestFormat)
+            {
+                var lastNewsKeyboard = new ReplyKeyboardMarkup
+                {
+                    Keyboard = new[] {1, 3, 7, 14}
+                        .Select(x => new[]
+                        {
+                            new KeyboardButton(PatternParser.ReplacePatternWithInt(configuration.TelegramLastNewsFormat, x))
+                        })
+                        .Concat(new[] { new [] {new KeyboardButton("Обратно!")} })
+                        .ToArray(),
+                    ResizeKeyboard = true
+                };
+
+                await botClient.SendTextMessageAsync(
+                    new ChatId(update.Message.Chat.Id),
+                    "За какой период будем искать?",
+                    replyMarkup: lastNewsKeyboard);
                 return;
             }
 
@@ -160,8 +211,28 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 log.Info($"Rewinding {telegramUsername} offset in vkontakte timeline to {newDate}");
                 await RewindSubscriberOffsetAsync(subscriber.Id, vkontakteTimeline.Name, newOffset);
                 await notifier.NotifyAsync(subscriber);
+                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Сделано, хозяин!");
+
                 return;
             }
+
+            var menuKeyboard = new ReplyKeyboardMarkup
+            {
+                Keyboard = new []
+                {
+                    new []
+                    {
+                        new KeyboardButton(configuration.TelegramSearchSettingRequestWords),
+                        new KeyboardButton(configuration.TelegramLastNewsRequestFormat),
+                    }
+                },
+                ResizeKeyboard = true
+            };
+
+            await botClient.SendTextMessageAsync(
+                new ChatId(update.Message.Chat.Id),
+                "Этот бот поможет тебе найти дешевые билеты в интернетах. Что сделать для тебя, дружище?",
+                replyMarkup: menuKeyboard);
         }
 
         private void Init()
