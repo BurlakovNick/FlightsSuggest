@@ -3,6 +3,7 @@ using FlightsSuggest.ConsoleApp.Implementation;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
 using FlightsSuggest.Core.Timelines;
+using VkNet;
 
 namespace FlightsSuggest.ConsoleApp
 {
@@ -17,7 +18,7 @@ namespace FlightsSuggest.ConsoleApp
                 "vandroukiru",
                 new FileOffsetStorage(),
                 new FileFlightNewsStorage(),
-                new VkontakteClient(vkApplicationId, vkAccessToken),
+                new VkontakteClient(vkApplicationId, vkAccessToken, new ConsoleLogger<VkApi>()),
                 new FlightNewsFactory()
             );
 
