@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 
 namespace FlightsSuggest.AzureFunctions.Functions
@@ -17,7 +17,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> RewindSubscriberOffsetAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -39,7 +39,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> RewindVkOffsetAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -61,7 +61,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> ShowSubscribersAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -79,7 +79,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> ShowSubscriberInfoAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -99,7 +99,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> ShowVkTimelineOffsetsAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -117,7 +117,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> CreateSubscriberAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -138,7 +138,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> SetTelegramWebhookAsync(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace FlightsSuggest.AzureFunctions.Functions
@@ -15,7 +15,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static IActionResult Hello(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
             )
         {
@@ -35,7 +35,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
                     VkToken = configuration.VkAccessToken
                 };
 
-                log.Info("Hello is done");
+                log.LogInformation("Hello is done");
 
                 return name != null
                     ? (ActionResult) new OkObjectResult(result)

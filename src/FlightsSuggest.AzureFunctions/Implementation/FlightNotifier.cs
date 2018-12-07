@@ -7,7 +7,7 @@ using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
 using FlightsSuggest.Core.Timelines;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -94,13 +94,13 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return subscriberStorage.CreateAsync(telegramUsername);
         }
 
-        public async Task ProcessTelegramUpdateAsync(Update update, TraceWriter log)
+        public async Task ProcessTelegramUpdateAsync(Update update, ILogger log)
         {
-            log.Info($"Received update: {JsonConvert.SerializeObject(update)}");
+            log.LogInformation($"Received update: {JsonConvert.SerializeObject(update)}");
 
             if (update.Message?.Text == null)
             {
-                log.Info("Message text is null, quiting");
+                log.LogInformation("Message text is null, quiting");
                 return;
             }
 
@@ -113,11 +113,11 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
             if (message.Contains(configuration.TelegramMagicWords))
             {
-                log.Info("Seen magic words, creating new subscriber");
+                log.LogInformation("Seen magic words, creating new subscriber");
 
                 if (subscriber?.TelegramChatId != null)
                 {
-                    log.Info("Subscriber already created");
+                    log.LogInformation("Subscriber already created");
                     return;
                 }
 
@@ -138,14 +138,14 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
             if (message.StartsWith(configuration.TelegramSearchSettingWords))
             {
-                log.Info("Seen search setting words, lets set up search");
+                log.LogInformation("Seen search setting words, lets set up search");
 
                 var setting = message.Remove(0, configuration.TelegramSearchSettingWords.Length);
                 var trigger = NotificationTriggers.BuildFromText(setting);
 
                 if (!trigger.success)
                 {
-                    log.Error($"Can't parse trigger expression. Error: {trigger.message}");
+                    log.LogError($"Can't parse trigger expression. Error: {trigger.message}");
                     await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), $"Что-то не так с настройкой. Ошибка: {trigger.message}");
                     return;
                 }
@@ -208,7 +208,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             {
                 var newDate = DateTime.UtcNow.AddDays(-lastNewsParseResult.result.Value);
                 var newOffset = newDate.Ticks;
-                log.Info($"Rewinding {telegramUsername} offset in vkontakte timeline to {newDate}");
+                log.LogInformation($"Rewinding {telegramUsername} offset in vkontakte timeline to {newDate}");
                 await RewindSubscriberOffsetAsync(subscriber.Id, vkontakteTimeline.Name, newOffset);
                 await notifier.NotifyAsync(subscriber);
                 await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Сделано, хозяин!");

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Telegram.Bot.Types;
 
@@ -17,7 +17,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task<IActionResult> NotifyAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
@@ -31,14 +31,14 @@ namespace FlightsSuggest.AzureFunctions.Functions
             
             //Every hour - temp
             [TimerTrigger("0 0 * * * *", RunOnStartup = false)]TimerInfo myTimer,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
             return InternalNotifyAsync(log, context);
         }
 
-        public static Task<IActionResult> InternalNotifyAsync(TraceWriter log, ExecutionContext context)
+        public static Task<IActionResult> InternalNotifyAsync(ILogger log, ExecutionContext context)
         {
             return Function.ExecuteAsync(log, nameof(NotifyAsync), async () =>
             {
@@ -47,7 +47,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 await flightNotifier.NotifyAsync();
 
                 var sended = flightNotifier.Sended;
-                log.Info($"Sended {sended.Length} notifications");
+                log.LogInformation($"Sended {sended.Length} notifications");
 
                 return new OkObjectResult(sended);
             });
@@ -57,7 +57,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         public static Task ReceiveTelegramUpdateAsync(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
             HttpRequest req,
-            TraceWriter log,
+            ILogger log,
             ExecutionContext context
         )
         {
