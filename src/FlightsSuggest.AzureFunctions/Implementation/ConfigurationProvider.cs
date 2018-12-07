@@ -7,7 +7,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
     {
         public static IFlightsConfiguration Provide(ExecutionContext context)
         {
-            return Core.Configuration.ConfigurationProvider.Provide(context.FunctionAppDirectory, "local.settings.json");
+            return Core.Configuration.ConfigurationProvider.Provide(context.FunctionAppDirectory);
         }
     }
 }
