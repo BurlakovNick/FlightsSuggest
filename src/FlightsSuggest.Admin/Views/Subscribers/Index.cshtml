@@ -1,0 +1,8 @@
+﻿@model FlightsSuggest.Admin.Models.SubscriberListViewModel
+
+<div>
+     @foreach (var subscriber in Model.Subscribers)
+     {
+         @Html.Partial("Subscriber", subscriber)
+     } 
+</div>

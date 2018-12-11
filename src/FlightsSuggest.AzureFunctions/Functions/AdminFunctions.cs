@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
 using Microsoft.AspNetCore.Http;
@@ -71,7 +72,18 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var flightNotifier = new FlightNotifier(configuration);
                 var subscribers = await flightNotifier.SelectSubscribersAsync();
 
-                return new OkObjectResult(subscribers);
+                return new OkObjectResult(
+                    subscribers
+                        .Select(x => new
+                        {
+                            x.Id,
+                            x.SendTelegramMessages,
+                            x.TelegramChatId,
+                            x.TelegramUsername,
+                            NotificationTrigger = x.NotificationTrigger.Serialize()
+                        })
+                        .ToArray()
+                );
             });
         }
 

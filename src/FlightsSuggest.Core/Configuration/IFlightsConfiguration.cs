@@ -11,5 +11,8 @@ namespace FlightsSuggest.Core.Configuration
         string TelegramSearchSettingWords { get; }
         string TelegramLastNewsRequestFormat { get; }
         string TelegramLastNewsFormat { get; }
+
+        string AzureFunctionsUrl { get; }
+        string ShowSubscribersUrl { get; }
     }
 }

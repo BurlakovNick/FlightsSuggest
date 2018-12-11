@@ -22,5 +22,7 @@ namespace FlightsSuggest.Core.Configuration
         public string TelegramSearchSettingWords => configuration["TelegramSearchSettingWords"];
         public string TelegramLastNewsRequestFormat => configuration["TelegramLastNewsRequestFormat"];
         public string TelegramLastNewsFormat => configuration["TelegramLastNewsFormat"];
+        public string AzureFunctionsUrl => configuration["AzureFunctionsUrl"];
+        public string ShowSubscribersUrl => configuration["ShowSubscribersUrl"];
     }
 }
