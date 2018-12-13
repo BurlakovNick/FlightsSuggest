@@ -1,4 +1,5 @@
-﻿using FlightsSuggest.Core.Timelines;
+﻿using System;
+using FlightsSuggest.Core.Timelines;
 
 namespace FlightsSuggest.Core.Notifications
 {
@@ -8,12 +9,12 @@ namespace FlightsSuggest.Core.Notifications
 
         public TermNotificationTrigger(string term)
         {
-            this.term = term;
+            this.term = term ?? throw new ArgumentNullException(nameof(term));
         }
 
         public bool ShouldNotify(FlightNews flightNews)
         {
-            return flightNews.NormalizedText.Contains(term);
+            return flightNews.NormalizedText.Contains(term.ToLower());
         }
 
         public string Serialize()
