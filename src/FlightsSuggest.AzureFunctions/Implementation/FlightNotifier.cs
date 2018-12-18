@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation.Storage;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
-using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
 using FlightsSuggest.Core.Telegram;
 using FlightsSuggest.Core.Timelines;
@@ -17,28 +16,40 @@ namespace FlightsSuggest.AzureFunctions.Implementation
     public class FlightNotifier
     {
         private readonly IFlightsConfiguration configuration;
-        private readonly VkontakteClient vkontakteClient;
-        private VkontakteTimeline vkontakteTimeline;
-        private Notifier notifier;
-        private INotificationSender telegramNotificationSender;
-        private SubscriberStorage subscriberStorage;
-        private TelegramBotClient botClient;
+        private readonly ITelegramClient telegramClient;
+        private readonly ITimeline[] timelines;
+        private readonly INotifier notifier;
+        private readonly INotificationSender telegramNotificationSender;
+        private readonly ISubscriberStorage subscriberStorage;
 
         public FlightNotifier(
-            IFlightsConfiguration configuration
-            )
+            IFlightsConfiguration configuration,
+            ITelegramClient telegramClient,
+            ITimeline[] timelines,
+            INotifier notifier,
+            INotificationSender telegramNotificationSender,
+            ISubscriberStorage subscriberStorage)
         {
             this.configuration = configuration;
-            vkontakteClient = new VkontakteClient(configuration.VkApplicationId, configuration.VkAccessToken);
-            Init();
+            this.telegramClient = telegramClient;
+            this.timelines = timelines;
+            this.notifier = notifier;
+            this.telegramNotificationSender = telegramNotificationSender;
+            this.subscriberStorage = subscriberStorage;
         }
 
         public FlightNews[] Sended { get; private set; }
 
         public async Task NotifyAsync()
         {
-            await vkontakteTimeline.ActualizeAsync();
-            await notifier.NotifyAsync();
+            foreach (var timeline in timelines)
+            {
+                await timeline.ActualizeAsync();
+            }
+
+            var subscribers = await subscriberStorage.SelectAllAsync();
+            await notifier.NotifyAsync(subscribers);
+
             Sended = telegramNotificationSender.Sended;
         }
 
@@ -49,7 +60,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
         public async Task RewindVkOffsetAsync(string vkGroup, long offset)
         {
-            var timeline = new [] {vkontakteTimeline}.FirstOrDefault(x => x.VkGroupName == vkGroup);
+            var timeline = timelines.OfType<VkontakteTimeline>().FirstOrDefault(x => x.VkGroupName == vkGroup);
             if (timeline == null)
             {
                 return;
@@ -70,9 +81,8 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
         public async Task<(string vkGroupName, DateTime? offset)[]> SelectVkOffsetsAsync()
         {
-            var timelines = new [] { vkontakteTimeline};
             var result = new List<(string, DateTime?)>();
-            foreach (var timeline in timelines)
+            foreach (var timeline in timelines.OfType<VkontakteTimeline>())
             {
                 var offset = await timeline.GetLatestOffsetAsync();
                 if (offset.HasValue)
@@ -177,22 +187,18 @@ namespace FlightsSuggest.AzureFunctions.Implementation
 
             if (message == configuration.TelegramLastNewsRequestFormat)
             {
-                var lastNewsKeyboard = new ReplyKeyboardMarkup
-                {
-                    Keyboard = new[] {1, 3, 7, 14}
-                        .Select(x => new[]
-                        {
-                            new KeyboardButton(PatternParser.ReplacePatternWithInt(configuration.TelegramLastNewsFormat, x))
-                        })
-                        .Concat(new[] { new [] {new KeyboardButton("Обратно!")} })
-                        .ToArray(),
-                    ResizeKeyboard = true
-                };
+                var replyKeyboard = new[] {1, 3, 7, 14}
+                    .Aggregate(new ReplyKeyboardBuilder(), (builder, x) =>
+                    {
+                        var buttonText = PatternParser.ReplacePatternWithInt(configuration.TelegramLastNewsFormat, x);
+                        return builder.AddRow(new ReplyKeyboardButton(buttonText));
+                    })
+                    .AddRow(new ReplyKeyboardButton("Обратно!"));
 
-                await botClient.SendTextMessageAsync(
-                    new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(
+                    chatId,
                     "За какой период будем искать?",
-                    replyMarkup: lastNewsKeyboard);
+                    replyKeyboard);
                 return;
             }
 
@@ -201,53 +207,26 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             {
                 var newDate = DateTime.UtcNow.AddDays(-lastNewsParseResult.result.Value);
                 var newOffset = newDate.Ticks;
-                log.LogInformation($"Rewinding {telegramUsername} offset in vkontakte timeline to {newDate}");
-                await RewindSubscriberOffsetAsync(subscriber.Id, vkontakteTimeline.Name, newOffset);
-                await notifier.NotifyAsync(subscriber);
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Сделано, хозяин!");
+
+                foreach (var timeline in timelines)
+                {
+                    log.LogInformation($"Rewinding {telegramUsername} offset in {timeline.Name} timeline to {newDate}");
+                    await RewindSubscriberOffsetAsync(subscriber.Id, timeline.Name, newOffset);
+                    await notifier.NotifyAsync(subscriber);
+                    await telegramClient.SendMessageAsync(chatId, "Сделано, хозяин!");
+                }
 
                 return;
             }
 
-            var menuKeyboard = new ReplyKeyboardMarkup
-            {
-                Keyboard = new []
-                {
-                    new []
-                    {
-                        new KeyboardButton(configuration.TelegramSearchSettingRequestWords),
-                        new KeyboardButton(configuration.TelegramLastNewsRequestFormat),
-                    }
-                },
-                ResizeKeyboard = true
-            };
+            var menuKeyboard = new ReplyKeyboardBuilder()
+                .AddRow(new ReplyKeyboardButton(configuration.TelegramSearchSettingRequestWords))
+                .AddRow(new ReplyKeyboardButton(configuration.TelegramLastNewsRequestFormat));
 
-            await botClient.SendTextMessageAsync(
-                new ChatId(update.Message.Chat.Id),
+            await telegramClient.SendMessageAsync(
+                chatId,
                 "Этот бот поможет тебе найти дешевые билеты в интернетах. Что сделать для тебя, дружище?",
-                replyMarkup: menuKeyboard);
-        }
-
-        private void Init()
-        {
-            var offsetStorage = new AzureTableOffsetStorage(configuration);
-
-            vkontakteTimeline = new VkontakteTimeline(
-                "vandroukiru",
-                offsetStorage,
-                new AzureTableFlightNewsStorage(configuration), 
-                vkontakteClient,
-                new FlightNewsFactory()
-            );
-
-            telegramNotificationSender = new TelegramNotificationSender(configuration);
-            subscriberStorage = new SubscriberStorage(configuration);
-            botClient = new TelegramBotClient(configuration.TelegramBotToken);
-
-            var notificationSenders = new[] { telegramNotificationSender, };
-            var subscribers = subscriberStorage.SelectAllAsync().GetAwaiter().GetResult();
-
-            notifier = new Notifier(notificationSenders, subscribers, new ITimeline[] { vkontakteTimeline }, offsetStorage);
+                menuKeyboard);
         }
     }
 }

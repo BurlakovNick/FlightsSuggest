@@ -7,7 +7,6 @@ namespace FlightsSuggest.Core.Timelines
 {
     public class VkontakteTimeline : ITimeline
     {
-        private readonly string vkGroupName;
         private readonly IOffsetStorage offsetStorage;
         private readonly IFlightNewsStorage flightNewsStorage;
         private readonly IVkontakteClient vkontakteClient;
@@ -23,19 +22,19 @@ namespace FlightsSuggest.Core.Timelines
             IFlightNewsFactory flightNewsFactory
         )
         {
-            this.vkGroupName = vkGroupName;
             this.offsetStorage = offsetStorage;
             this.flightNewsStorage = flightNewsStorage;
             this.vkontakteClient = vkontakteClient;
             this.flightNewsFactory = flightNewsFactory;
             flightSource = $"{Name}_{vkGroupName}";
             batchSize = 100;
+            VkGroupName = vkGroupName;
         }
 
         public async Task ActualizeAsync()
         {
             var offset = await offsetStorage.FindAsync(flightSource);
-            var latestOffset = (await vkontakteClient.GetPostsAsync(vkGroupName, 0, 10))
+            var latestOffset = (await vkontakteClient.GetPostsAsync(VkGroupName, 0, 10))
                 .OrderByDescending(x => x.Date)
                 .First()
                 .Date
@@ -55,7 +54,7 @@ namespace FlightsSuggest.Core.Timelines
             var skip = 0UL;
             while (true)
             {
-                var wallPosts = (await vkontakteClient.GetPostsAsync(vkGroupName, skip, (ulong)batchSize))
+                var wallPosts = (await vkontakteClient.GetPostsAsync(VkGroupName, skip, (ulong)batchSize))
                     .OrderByDescending(x => x.Date)
                     .ToArray();
 
@@ -94,6 +93,6 @@ namespace FlightsSuggest.Core.Timelines
 
         public string Name => "Vkontakte";
 
-        public string VkGroupName => vkGroupName;
+        public string VkGroupName { get; }
     }
 }

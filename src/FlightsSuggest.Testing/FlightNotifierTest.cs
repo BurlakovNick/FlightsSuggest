@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -15,17 +16,17 @@ namespace FlightsSuggest.Testing
         [SetUp]
         public void SetUp()
         {
-            flightNotifier = new FlightNotifier(Configuration);
+            flightNotifier = Container.Container.Build().GetService<FlightNotifier>();
         }
 
-        [Test]
+        [Test, Ignore("Только для ручного уведомления ВСЕХ пользователей")]
         public async Task TestNotify()
         {
             await flightNotifier.NotifyAsync();
             Console.WriteLine(JsonConvert.SerializeObject(flightNotifier.Sended, Formatting.Indented));
         }
 
-        [Test]
+        [Test, Ignore("Только для ручного отмотки времени")]
         public async Task TestRewindVkOffsetAsync()
         {
             const string vkGroup = "vandroukiru";

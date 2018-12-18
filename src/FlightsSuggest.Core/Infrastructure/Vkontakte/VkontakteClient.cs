@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.Core.Configuration;
 using Microsoft.Extensions.Logging;
 using VkNet;
 using VkNet.Model;
@@ -13,12 +14,11 @@ namespace FlightsSuggest.Core.Infrastructure.Vkontakte
         private readonly Lazy<Task<VkApi>> client;
 
         public VkontakteClient(
-            ulong applicationId,
-            string accessToken,
+            IFlightsConfiguration flightsConfiguration,
             ILogger<VkApi> log = null
         )
         {
-            client = new Lazy<Task<VkApi>>(() => CreateClientAsync(applicationId, accessToken, log));
+            client = new Lazy<Task<VkApi>>(() => CreateClientAsync(flightsConfiguration.VkApplicationId, flightsConfiguration.VkAccessToken, log));
         }
 
         public async Task<VkWallPost[]> GetPostsAsync(string groupName, ulong offset, ulong count)

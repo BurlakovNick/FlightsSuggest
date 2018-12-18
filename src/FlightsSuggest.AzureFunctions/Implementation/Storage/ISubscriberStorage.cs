@@ -8,5 +8,6 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
         Task<Subscriber> CreateAsync(string telegramUsername);
         Task<Subscriber> UpdateTelegramChatIdAsync(string subscriberId, long telegramChatId);
         Task<Subscriber[]> SelectAllAsync();
+        Task<Subscriber> UpdateNotificationTriggerAsync(string subscriberId, INotificationTrigger trigger);
     }
 }

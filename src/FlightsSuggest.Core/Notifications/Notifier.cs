@@ -7,27 +7,24 @@ using FlightsSuggest.Core.Timelines;
 
 namespace FlightsSuggest.Core.Notifications
 {
-    public class Notifier
+    public class Notifier : INotifier
     {
         private readonly INotificationSender[] senders;
-        private readonly Subscriber[] subscribers;
         private readonly ITimeline[] timelines;
         private readonly IOffsetStorage offsetStorage;
 
         public Notifier(
             INotificationSender[] senders,
-            Subscriber[] subscribers,
             ITimeline[] timelines,
             IOffsetStorage offsetStorage
         )
         {
             this.senders = senders;
-            this.subscribers = subscribers;
             this.timelines = timelines;
             this.offsetStorage = offsetStorage;
         }
 
-        public async Task NotifyAsync()
+        public async Task NotifyAsync(Subscriber[] subscribers)
         {
             foreach (var subscriber in subscribers)
             {

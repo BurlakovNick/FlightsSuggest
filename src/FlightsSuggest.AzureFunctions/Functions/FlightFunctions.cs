@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
-using FlightsSuggest.AzureFunctions.Implementation;
+using FlightsSuggest.AzureFunctions.Implementation.Container;
+using FlightsSuggest.Core.Telegram;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -42,8 +43,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         {
             return Function.ExecuteAsync(log, nameof(NotifyAsync), async () =>
             {
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
                 await flightNotifier.NotifyAsync();
 
                 var sended = flightNotifier.Sended;
@@ -63,8 +63,8 @@ namespace FlightsSuggest.AzureFunctions.Functions
         {
             return Function.ExecuteAsync(log, nameof(ReceiveTelegramUpdateAsync), async () =>
             {
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
+
                 var update = await DeserializeMessageAsync();
                 if (update.Message == null)
                 {

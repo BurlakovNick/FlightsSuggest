@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
+using FlightsSuggest.AzureFunctions.Implementation.Container;
 using FlightsSuggest.AzureFunctions.Implementation.Factories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,9 +30,9 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var date = req.Query["date"];
                 var offset = DateTime.Parse(date).Ticks;
 
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
                 await flightNotifier.RewindSubscriberOffsetAsync(subscriberId, timelineName, offset);
+
                 return new OkObjectResult("done");
             });
         }
@@ -50,8 +51,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var date = req.Query["date"];
                 var offset = DateTime.Parse(date).Ticks;
 
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
                 await flightNotifier.RewindVkOffsetAsync(vkGroup, offset);
 
                 return new OkObjectResult("done");
@@ -68,8 +68,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         {
             return Function.ExecuteAsync(log, nameof(ShowSubscribersAsync), async () =>
             {
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
                 var subscribers = await flightNotifier.SelectSubscribersAsync();
                 var subscriberDtoFactory = new SubscriberDtoFactory();
                 var subscriberDtos = subscriberDtoFactory.Create(subscribers);
@@ -90,8 +89,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
             {
                 var subscriberId = req.Query["subscriberId"];
 
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
                 var offsets = await flightNotifier.SelectOffsetsAsync(subscriberId);
 
                 return new OkObjectResult(offsets);
@@ -108,8 +106,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         {
             return Function.ExecuteAsync(log, nameof(ShowVkTimelineOffsetsAsync), async () =>
             {
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
                 var offsets = await flightNotifier.SelectVkOffsetsAsync();
 
                 return new OkObjectResult(offsets);
@@ -128,8 +125,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
             {
                 var telegramUsername = req.Query["telegramUsername"];
 
-                var configuration = ConfigurationProvider.Provide(context);
-                var flightNotifier = new FlightNotifier(configuration);
+                var flightNotifier = Container.Build(context).GetFlightNotifier();
 
                 await flightNotifier.CreateSubscriberAsync(telegramUsername);
 
