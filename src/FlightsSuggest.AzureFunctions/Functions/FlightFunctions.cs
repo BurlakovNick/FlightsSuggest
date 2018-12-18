@@ -66,8 +66,14 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var configuration = ConfigurationProvider.Provide(context);
                 var flightNotifier = new FlightNotifier(configuration);
                 var update = await DeserializeMessageAsync();
+                if (update.Message == null)
+                {
+                    log.LogInformation("Message text is null, quiting");
+                    return new OkObjectResult("ok");
+                }
 
-                await flightNotifier.ProcessTelegramUpdateAsync(update, log);
+                var telegramUpdate = new TelegramUpdate(update);
+                await flightNotifier.ProcessTelegramUpdateAsync(telegramUpdate, log);
 
                 return new OkObjectResult("ok");
             });

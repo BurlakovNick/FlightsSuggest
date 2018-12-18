@@ -7,12 +7,10 @@ using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
+using FlightsSuggest.Core.Telegram;
 using FlightsSuggest.Core.Timelines;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace FlightsSuggest.AzureFunctions.Implementation
 {
@@ -95,19 +93,13 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return subscriberStorage.CreateAsync(telegramUsername);
         }
 
-        public async Task ProcessTelegramUpdateAsync(Update update, ILogger log)
+        public async Task ProcessTelegramUpdateAsync(TelegramUpdate update, ILogger log)
         {
             log.LogInformation($"Received update: {JsonConvert.SerializeObject(update)}");
 
-            if (update.Message?.Text == null)
-            {
-                log.LogInformation("Message text is null, quiting");
-                return;
-            }
-
-            var message = update.Message.Text.ToLower();
-            var telegramUsername = update.Message.Chat.Username;
-            var telegramChatId = update.Message.Chat.Id;
+            var message = update.Text.ToLower();
+            var telegramUsername = update.Username;
+            var chatId = update.ChatId;
 
             var subscribers = (await subscriberStorage.SelectAllAsync()).ToDictionary(x => x.TelegramUsername);
             subscribers.TryGetValue(telegramUsername, out var subscriber);
@@ -127,8 +119,8 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                     subscriber = await subscriberStorage.CreateAsync(telegramUsername);
                 }
 
-                await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, telegramChatId);
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Привет, подписчик!");
+                await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, chatId);
+                await telegramClient.SendMessageAsync(update.ChatId, "Привет, подписчик!");
                 return;
             }
 
@@ -147,37 +139,37 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 if (!trigger.success)
                 {
                     log.LogError($"Can't parse trigger expression. Error: {trigger.message}");
-                    await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), $"Что-то не так с настройкой. Ошибка: {trigger.message}");
+                    await telegramClient.SendMessageAsync(chatId, $"Что-то не так с настройкой. Ошибка: {trigger.message}");
                     return;
                 }
 
                 await subscriberStorage.UpdateNotificationTriggerAsync(subscriber.Id, trigger.result);
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id), "Принято, босс! Теперь бот будет присылать только новости с такими словами");
+                await telegramClient.SendMessageAsync(chatId, "Принято, босс! Теперь бот будет присылать только новости с такими словами");
 
                 return;
             }
 
             if (message == configuration.TelegramSearchSettingRequestWords)
             {
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     "Чтобы настроить поиск, нужно послать боту сообщение в таком формате:");
 
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     $"{configuration.TelegramSearchSettingWords} [Дублин, Майорка, Вена]");
 
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     "Бот будет искать новости, в тексте который есть слова 'Дублин', 'Майорка' или 'Вена'");
 
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     "Если хочешь, чтобы обязательно встретилось несколько слов, можешь обернуть их в круглые скобки:");
 
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     $"{configuration.TelegramSearchSettingWords} (Тайланд, дешево)");
 
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     "Условия можно комбинировать как тебе захочется! Например, если хочешь полететь в Тайланд дешево или в Дублин дорого, сделай так:");
 
-                await botClient.SendTextMessageAsync(new ChatId(update.Message.Chat.Id),
+                await telegramClient.SendMessageAsync(chatId,
                     $"{configuration.TelegramSearchSettingWords} [(Тайланд, дешево), (Дублин, дорого)]");
 
                 return;
