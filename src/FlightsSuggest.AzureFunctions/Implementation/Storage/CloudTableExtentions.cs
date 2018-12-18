@@ -7,7 +7,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 
-namespace FlightsSuggest.AzureFunctions.Implementation
+namespace FlightsSuggest.AzureFunctions.Implementation.Storage
 {
     public static class CloudTableExtentions
     {
