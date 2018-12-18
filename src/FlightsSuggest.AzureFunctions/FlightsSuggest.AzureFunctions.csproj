@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlightsSuggest.Core\FlightsSuggest.Core.csproj" />
+    <ProjectReference Include="..\FlightsSuggest.Dto\FlightsSuggest.Dto.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

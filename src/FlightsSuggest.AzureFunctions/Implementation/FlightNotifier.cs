@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.AzureFunctions.Implementation.Storage;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;

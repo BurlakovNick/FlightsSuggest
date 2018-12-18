@@ -3,6 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
+using FlightsSuggest.AzureFunctions.Implementation.Factories;
+using FlightsSuggest.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -71,19 +73,10 @@ namespace FlightsSuggest.AzureFunctions.Functions
                 var configuration = ConfigurationProvider.Provide(context);
                 var flightNotifier = new FlightNotifier(configuration);
                 var subscribers = await flightNotifier.SelectSubscribersAsync();
+                var subscriberDtoFactory = new SubscriberDtoFactory();
+                var subscriberDtos = subscriberDtoFactory.Create(subscribers);
 
-                return new OkObjectResult(
-                    subscribers
-                        .Select(x => new
-                        {
-                            x.Id,
-                            x.SendTelegramMessages,
-                            x.TelegramChatId,
-                            x.TelegramUsername,
-                            NotificationTrigger = x.NotificationTrigger.Serialize()
-                        })
-                        .ToArray()
-                );
+                return new OkObjectResult(subscriberDtos);
             });
         }
 
