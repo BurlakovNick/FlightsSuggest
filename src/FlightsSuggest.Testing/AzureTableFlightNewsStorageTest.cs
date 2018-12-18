@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using FlightsSuggest.AzureFunctions.Implementation;
+using FlightsSuggest.AzureFunctions.Implementation.Storage;
 using FlightsSuggest.Core.Timelines;
 using NUnit.Framework;
 

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using FlightsSuggest.Dto;
 
 namespace FlightsSuggest.Admin.Infrastructure
 {

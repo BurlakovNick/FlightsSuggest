@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FlightsSuggest.Admin.Models
+﻿namespace FlightsSuggest.Admin.Models
 {
     public class SubscriberListViewModel
     {
@@ -9,11 +7,11 @@ namespace FlightsSuggest.Admin.Models
 
     public class SubscriberViewModel
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string TelegramUsername { get; set; }
         public string TelegramName { get; set; }
         public bool SendTelegramMessages { get; set; }
-        public int TelegramChatId { get; set; }
+        public long? TelegramChatId { get; set; }
         public string NotificationTrigger { get; set; }
     }
 }

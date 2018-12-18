@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using FlightsSuggest.AzureFunctions.Implementation;
 using FlightsSuggest.AzureFunctions.Implementation.Factories;
-using FlightsSuggest.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;

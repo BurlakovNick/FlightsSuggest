@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using FlightsSuggest.Core.Configuration;
+using FlightsSuggest.Dto;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Deserializers;

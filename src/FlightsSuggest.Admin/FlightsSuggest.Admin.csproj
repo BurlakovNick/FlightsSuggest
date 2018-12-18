@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlightsSuggest.Core\FlightsSuggest.Core.csproj" />
+    <ProjectReference Include="..\FlightsSuggest.Dto\FlightsSuggest.Dto.csproj" />
   </ItemGroup>
 
   <ItemGroup>
