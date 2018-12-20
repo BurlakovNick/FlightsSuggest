@@ -1,4 +1,5 @@
 ﻿using FlightsSuggest.AzureFunctions.Implementation.Storage;
+using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
 using FlightsSuggest.Core.Notifications;
@@ -26,22 +27,31 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Container
             services.AddSingleton<ISubscriberStorage, SubscriberStorage>();
             services.AddSingleton<IFlightNewsStorage, AzureTableFlightNewsStorage>();
 
-            services.AddSingleton<INotificationSender, TelegramNotificationSender>();
+            services.AddSingleton(serviceProvider =>
+                new INotificationSender[]
+                {
+                    new TelegramNotificationSender(serviceProvider.GetService<IFlightsConfiguration>())
+                });
 
             services.AddSingleton<ITelegramClient, TelegramClient>();
             services.AddSingleton<IVkontakteClient, VkontakteClient>();
 
             services.AddSingleton<IFlightNewsFactory, FlightNewsFactory>();
 
-            services.AddSingleton<ITimeline>(serviceProvider => new VkontakteTimeline(
-                "vandroukiru",
-                serviceProvider.GetService<IOffsetStorage>(),
-                serviceProvider.GetService<IFlightNewsStorage>(),
-                serviceProvider.GetService<IVkontakteClient>(),
-                serviceProvider.GetService<IFlightNewsFactory>()
-            ));
+            services.AddSingleton(serviceProvider =>
+                new ITimeline[]
+                {
+                    new VkontakteTimeline(
+                        "vandroukiru",
+                        serviceProvider.GetRequiredService<IOffsetStorage>(),
+                        serviceProvider.GetRequiredService<IFlightNewsStorage>(),
+                        serviceProvider.GetRequiredService<IVkontakteClient>(),
+                        serviceProvider.GetRequiredService<IFlightNewsFactory>()
+                    )
+                });
 
             services.AddSingleton<INotifier, Notifier>();
+            services.AddSingleton<FlightNotifier, FlightNotifier>();
         }
     }
 }

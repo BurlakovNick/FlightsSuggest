@@ -17,20 +17,28 @@ namespace FlightsSuggest.ConsoleApp.Container
             services.AddSingleton<IOffsetStorage, FileOffsetStorage>();
             services.AddSingleton<IFlightNewsStorage, FileFlightNewsStorage>();
 
-            services.AddSingleton<INotificationSender, ConsoleNotificationSender>();
+            services.AddSingleton(_ =>
+                new INotificationSender[]
+                {
+                    new ConsoleNotificationSender(),
+                });
 
             services.AddSingleton<ITelegramClient, TelegramClient>();
             services.AddSingleton<IVkontakteClient, VkontakteClient>();
 
             services.AddSingleton<IFlightNewsFactory, FlightNewsFactory>();
 
-            services.AddSingleton<ITimeline>(serviceProvider => new VkontakteTimeline(
-                "vandroukiru",
-                serviceProvider.GetService<IOffsetStorage>(),
-                serviceProvider.GetService<IFlightNewsStorage>(),
-                serviceProvider.GetService<IVkontakteClient>(),
-                serviceProvider.GetService<IFlightNewsFactory>()
-            ));
+            services.AddSingleton(serviceProvider =>
+                new ITimeline[]
+                {
+                    new VkontakteTimeline(
+                        "vandroukiru",
+                        serviceProvider.GetRequiredService<IOffsetStorage>(),
+                        serviceProvider.GetRequiredService<IFlightNewsStorage>(),
+                        serviceProvider.GetRequiredService<IVkontakteClient>(),
+                        serviceProvider.GetRequiredService<IFlightNewsFactory>()
+                    )
+                });
 
             services.AddSingleton<INotifier, Notifier>();
         }

@@ -16,7 +16,7 @@ namespace FlightsSuggest.Testing
         [SetUp]
         public void SetUp()
         {
-            flightNotifier = Container.Container.Build().GetService<FlightNotifier>();
+            flightNotifier = Container.Container.Build().GetRequiredService<FlightNotifier>();
         }
 
         [Test, Ignore("Только для ручного уведомления ВСЕХ пользователей")]

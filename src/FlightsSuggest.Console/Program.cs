@@ -17,7 +17,7 @@ namespace FlightsSuggest.ConsoleApp
 
             var subscriber = new Subscriber("nick", null, 45921723, false, new TermNotificationTrigger("Грец"));
 
-            await serviceProvider.GetService<INotifier>().NotifyAsync(subscriber);
+            await serviceProvider.GetRequiredService<INotifier>().NotifyAsync(subscriber);
         }
     }
 }

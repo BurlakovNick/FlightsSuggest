@@ -7,7 +7,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Container
     {
         public static FlightNotifier GetFlightNotifier(this IServiceProvider serviceProvider)
         {
-            return serviceProvider.GetService<FlightNotifier>();
+            return serviceProvider.GetRequiredService<FlightNotifier>();
         }
     }
 }

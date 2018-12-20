@@ -19,7 +19,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
         private readonly ITelegramClient telegramClient;
         private readonly ITimeline[] timelines;
         private readonly INotifier notifier;
-        private readonly INotificationSender telegramNotificationSender;
+        private readonly INotificationSender[] notificationSenders;
         private readonly ISubscriberStorage subscriberStorage;
 
         public FlightNotifier(
@@ -27,14 +27,14 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             ITelegramClient telegramClient,
             ITimeline[] timelines,
             INotifier notifier,
-            INotificationSender telegramNotificationSender,
+            INotificationSender[] notificationSenders,
             ISubscriberStorage subscriberStorage)
         {
             this.configuration = configuration;
             this.telegramClient = telegramClient;
             this.timelines = timelines;
             this.notifier = notifier;
-            this.telegramNotificationSender = telegramNotificationSender;
+            this.notificationSenders = notificationSenders;
             this.subscriberStorage = subscriberStorage;
         }
 
@@ -50,7 +50,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             var subscribers = await subscriberStorage.SelectAllAsync();
             await notifier.NotifyAsync(subscribers);
 
-            Sended = telegramNotificationSender.Sended;
+            Sended = notificationSenders.SelectMany(x => x.Sended).ToArray();
         }
 
         public Task RewindSubscriberOffsetAsync(string subscriberId, string timelineName, long offset)

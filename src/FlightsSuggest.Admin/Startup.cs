@@ -32,7 +32,7 @@ namespace FlightsSuggest.Admin
                 .AddSingleton(
                     serviceProvider =>
                     {
-                        var hostingEnvironment = serviceProvider.GetService<IHostingEnvironment>();
+                        var hostingEnvironment = serviceProvider.GetRequiredService<IHostingEnvironment>();
                         return ConfigurationProvider.Provide(hostingEnvironment.ContentRootPath);
                     });
 
