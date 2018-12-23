@@ -5,8 +5,8 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
 {
     public interface ISubscriberStorage
     {
-        Task<Subscriber> CreateAsync(string telegramUsername);
-        Task<Subscriber> UpdateTelegramChatIdAsync(string subscriberId, long telegramChatId);
+        Task<Subscriber> CreateAsync(string telegramUsername, long telegramChatId, int telegramUserId);
+        Task<Subscriber> UpdateSubscriberAsync(string subscriberId, long telegramChatId, int telegramUserId);
         Task<Subscriber[]> SelectAllAsync();
         Task<Subscriber> UpdateNotificationTriggerAsync(string subscriberId, INotificationTrigger trigger);
     }

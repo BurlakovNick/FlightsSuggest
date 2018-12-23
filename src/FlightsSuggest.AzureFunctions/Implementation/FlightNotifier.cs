@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.AzureFunctions.Implementation.Factories;
 using FlightsSuggest.AzureFunctions.Implementation.Storage;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Notifications;
 using FlightsSuggest.Core.Telegram;
 using FlightsSuggest.Core.Timelines;
+using FlightsSuggest.Dto;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -21,6 +23,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
         private readonly INotifier notifier;
         private readonly INotificationSender[] notificationSenders;
         private readonly ISubscriberStorage subscriberStorage;
+        private readonly ISubscriberDtoFactory subscriberDtoFactory;
 
         public FlightNotifier(
             IFlightsConfiguration configuration,
@@ -28,7 +31,9 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             ITimeline[] timelines,
             INotifier notifier,
             INotificationSender[] notificationSenders,
-            ISubscriberStorage subscriberStorage)
+            ISubscriberStorage subscriberStorage,
+            ISubscriberDtoFactory subscriberDtoFactory
+            )
         {
             this.configuration = configuration;
             this.telegramClient = telegramClient;
@@ -36,6 +41,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             this.notifier = notifier;
             this.notificationSenders = notificationSenders;
             this.subscriberStorage = subscriberStorage;
+            this.subscriberDtoFactory = subscriberDtoFactory;
         }
 
         public FlightNews[] Sended { get; private set; }
@@ -69,9 +75,10 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             await timeline.WriteOffsetAsync(offset);
         }
 
-        public Task<Subscriber[]> SelectSubscribersAsync()
+        public async Task<SubscriberDto[]> SelectSubscribersAsync()
         {
-            return subscriberStorage.SelectAllAsync();
+            var subscribers = await subscriberStorage.SelectAllAsync();
+            return await subscriberDtoFactory.CreateAsync(subscribers);
         }
 
         public Task<(string timelineName, DateTime? offset)[]> SelectOffsetsAsync(string subscriberId)
@@ -98,11 +105,6 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             return result.ToArray();
         }
 
-        public Task CreateSubscriberAsync(string telegramUsername)
-        {
-            return subscriberStorage.CreateAsync(telegramUsername);
-        }
-
         public async Task ProcessTelegramUpdateAsync(TelegramUpdate update, ILogger log)
         {
             log.LogInformation($"Received update: {JsonConvert.SerializeObject(update)}");
@@ -110,34 +112,9 @@ namespace FlightsSuggest.AzureFunctions.Implementation
             var message = update.Text.ToLower();
             var telegramUsername = update.Username;
             var chatId = update.ChatId;
+            var userId = update.UserId;
 
-            var subscribers = (await subscriberStorage.SelectAllAsync()).ToDictionary(x => x.TelegramUsername);
-            subscribers.TryGetValue(telegramUsername, out var subscriber);
-
-            if (message.Contains(configuration.TelegramMagicWords))
-            {
-                log.LogInformation("Seen magic words, creating new subscriber");
-
-                if (subscriber?.TelegramChatId != null)
-                {
-                    log.LogInformation("Subscriber already created");
-                    return;
-                }
-
-                if (subscriber == null)
-                {
-                    subscriber = await subscriberStorage.CreateAsync(telegramUsername);
-                }
-
-                await subscriberStorage.UpdateTelegramChatIdAsync(subscriber.Id, chatId);
-                await telegramClient.SendMessageAsync(update.ChatId, "Привет, подписчик!");
-                return;
-            }
-
-            if (subscriber == null)
-            {
-                return;
-            }
+            var subscriber = await GetSubscriberAsync(telegramUsername, chatId, userId);
 
             if (message.StartsWith(configuration.TelegramSearchSettingWords))
             {
@@ -227,6 +204,26 @@ namespace FlightsSuggest.AzureFunctions.Implementation
                 chatId,
                 "Этот бот поможет тебе найти дешевые билеты в интернетах. Что сделать для тебя, дружище?",
                 menuKeyboard);
+        }
+
+        private async Task<Subscriber> GetSubscriberAsync(string telegramUsername, long chatId, int userId)
+        {
+            var subscribers = (await subscriberStorage.SelectAllAsync()).ToDictionary(x => x.TelegramUsername);
+            subscribers.TryGetValue(telegramUsername, out var subscriber);
+
+            if (subscriber == null)
+            {
+                subscriber = await subscriberStorage.CreateAsync(telegramUsername, chatId, userId);
+                await telegramClient.SendMessageAsync(chatId, "Привет, подписчик!");
+            }
+
+            if (!subscriber.TelegramChatId.HasValue || subscriber.TelegramChatId == 0 ||
+                !subscriber.TelegramUserId.HasValue || subscriber.TelegramUserId == 0)
+            {
+                subscriber = await subscriberStorage.UpdateSubscriberAsync(subscriber.Id, chatId, userId);
+            }
+
+            return subscriber;
         }
     }
 }

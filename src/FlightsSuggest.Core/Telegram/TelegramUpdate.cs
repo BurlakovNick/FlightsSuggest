@@ -16,10 +16,12 @@ namespace FlightsSuggest.Core.Telegram
             Text = update.Message.Text;
             Username = update.Message.Chat.Username;
             ChatId = update.Message.Chat.Id;
+            UserId = update.Message.From.Id;
         }
 
         public string Text { get; }
         public string Username { get; }
         public long ChatId { get; }
+        public int UserId { get; }
     }
 }

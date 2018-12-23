@@ -1,5 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using FlightsSuggest.Core.Telegram;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -27,6 +31,14 @@ namespace FlightsSuggest.Testing
                     await botClient.SendTextMessageAsync(new ChatId("45921723"), $"лови ответочку от {update.Message.Chat.Username}: {messageText}");
                 }
             }
+        }
+
+        [Test]
+        public async Task TestGetUserAsync()
+        {
+            var telegramClient = Container.Container.Build().GetRequiredService<ITelegramClient>();
+            var user = await telegramClient.GetUserAsync(45921723, 45921723);
+            Console.WriteLine(JsonConvert.SerializeObject(user, Formatting.Indented));
         }
     }
 }

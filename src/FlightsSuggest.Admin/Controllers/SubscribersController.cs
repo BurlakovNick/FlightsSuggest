@@ -23,14 +23,20 @@ namespace FlightsSuggest.Admin.Controllers
             var subscriberListViewModel = new SubscriberListViewModel
             {
                 Subscribers = subscribers
-                    .Select(x => new SubscriberViewModel
+                    .Select(x =>
                     {
-                        Id = x.Id,
-                        SendTelegramMessages = x.SendTelegramMessages,
-                        NotificationTrigger = x.NotificationTrigger,
-                        TelegramUsername = x.TelegramUsername,
-                        TelegramChatId = x.TelegramChatId,
-                        TelegramName = x.TelegramUsername
+                        var fullName = x.FirstName + " " + x.LastName;
+
+                        return new SubscriberViewModel
+                        {
+                            Id = x.Id,
+                            SendTelegramMessages = x.SendTelegramMessages,
+                            NotificationTrigger = x.NotificationTrigger,
+                            TelegramUsername = x.TelegramUsername,
+                            TelegramChatId = x.TelegramChatId,
+                            TelegramFullName = !string.IsNullOrEmpty(fullName) ? fullName : x.TelegramUsername,
+                            IsBot = x.IsBot == true,
+                        };
                     })
                     .ToArray()
             };

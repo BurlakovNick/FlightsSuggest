@@ -1,7 +1,15 @@
 ﻿@model FlightsSuggest.Admin.Models.SubscriberViewModel
 
 <div>
+    <h2>
+        @Model.TelegramFullName
+    </h2>
     <b>Username:</b> @Model.TelegramUsername
 
     <b>NotificationTrigger:</b> @Model.NotificationTrigger
+    
+    @if (Model.IsBot)
+    {
+        <b style="color: red">BOT</b>
+    }
 </div>

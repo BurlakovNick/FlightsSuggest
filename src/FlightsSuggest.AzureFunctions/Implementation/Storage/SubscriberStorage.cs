@@ -19,7 +19,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
             subscribersTable = flightsConfiguration.GetAzureTableAsync("Subscribers").Result;
         }
 
-        public async Task<Subscriber> CreateAsync(string telegramUsername)
+        public async Task<Subscriber> CreateAsync(string telegramUsername, long telegramChatId, int telegramUserId)
         {
             var existSubscriber = await FindUserAsync(telegramUsername);
             if (existSubscriber != null)
@@ -28,12 +28,12 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
             }
 
             var id = Guid.NewGuid().ToString();
-            var subscriber = new Subscriber(id, telegramUsername, null, false, new EmptyTrigger());
+            var subscriber = new Subscriber(id, telegramUsername, telegramChatId, telegramUserId, false, new EmptyTrigger());
             await subscribersTable.WriteAsync(new SubscriberDbo(subscriber));
             return subscriber;
         }
 
-        public async Task<Subscriber> UpdateTelegramChatIdAsync(string subscriberId, long telegramChatId)
+        public async Task<Subscriber> UpdateSubscriberAsync(string subscriberId, long telegramChatId, int telegramUserId)
         {
             var subscriber = await subscribersTable.FindAsync<SubscriberDbo>(GlobalPartitionKey, subscriberId);
             if (subscriber == null)
@@ -42,6 +42,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
             }
 
             subscriber.TelegramChatId = telegramChatId;
+            subscriber.TelegramUserId = telegramUserId;
             subscriber.SendTelegramMessages = true;
 
             await subscribersTable.WriteAsync(subscriber);
@@ -85,7 +86,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
             {
                 throw new InvalidOperationException($"Can't parse setting for subscriber {JsonConvert.SerializeObject(dbo)}");
             }
-            return new Subscriber(dbo.Id, dbo.TelegramUsername, dbo.TelegramChatId, dbo.SendTelegramMessages, trigger.result);
+            return new Subscriber(dbo.Id, dbo.TelegramUsername, dbo.TelegramChatId, dbo.TelegramUserId, dbo.SendTelegramMessages, trigger.result);
         }
 
         class SubscriberDbo : TableEntity
@@ -110,6 +111,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Storage
             public string TelegramUsername { get; set; }
             public bool SendTelegramMessages { get; set; }
             public long? TelegramChatId { get; set; }
+            public int? TelegramUserId { get; set; }
             public string SearchSettings { get; set; }
         }
     }

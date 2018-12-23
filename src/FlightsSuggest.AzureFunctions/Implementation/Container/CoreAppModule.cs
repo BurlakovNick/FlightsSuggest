@@ -1,4 +1,5 @@
-﻿using FlightsSuggest.AzureFunctions.Implementation.Storage;
+﻿using FlightsSuggest.AzureFunctions.Implementation.Factories;
+using FlightsSuggest.AzureFunctions.Implementation.Storage;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
 using FlightsSuggest.Core.Infrastructure.Vkontakte;
@@ -7,20 +8,24 @@ using FlightsSuggest.Core.Telegram;
 using FlightsSuggest.Core.Timelines;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace FlightsSuggest.AzureFunctions.Implementation.Container
 {
     public class CoreAppModule : IContainerModule
     {
         private readonly ExecutionContext context;
+        private readonly ILogger logger;
 
-        public CoreAppModule(ExecutionContext context)
+        public CoreAppModule(ExecutionContext context, ILogger logger)
         {
             this.context = context;
+            this.logger = logger;
         }
 
         public void Load(IServiceCollection services)
         {
+            services.AddSingleton(logger);
             services.AddSingleton(_ => Core.Configuration.ConfigurationProvider.Provide(context.FunctionAppDirectory));
 
             services.AddSingleton<IOffsetStorage, AzureTableOffsetStorage>();
@@ -52,6 +57,7 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Container
 
             services.AddSingleton<INotifier, Notifier>();
             services.AddSingleton<FlightNotifier, FlightNotifier>();
+            services.AddSingleton<ISubscriberDtoFactory, SubscriberDtoFactory>();
         }
     }
 }

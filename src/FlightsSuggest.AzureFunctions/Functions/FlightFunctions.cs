@@ -43,7 +43,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         {
             return Function.ExecuteAsync(log, nameof(NotifyAsync), async () =>
             {
-                var flightNotifier = Container.Build(context).GetFlightNotifier();
+                var flightNotifier = Container.Build(context, log).GetFlightNotifier();
                 await flightNotifier.NotifyAsync();
 
                 var sended = flightNotifier.Sended;
@@ -63,7 +63,7 @@ namespace FlightsSuggest.AzureFunctions.Functions
         {
             return Function.ExecuteAsync(log, nameof(ReceiveTelegramUpdateAsync), async () =>
             {
-                var flightNotifier = Container.Build(context).GetFlightNotifier();
+                var flightNotifier = Container.Build(context, log).GetFlightNotifier();
 
                 var update = await DeserializeMessageAsync();
                 if (update.Message == null)
