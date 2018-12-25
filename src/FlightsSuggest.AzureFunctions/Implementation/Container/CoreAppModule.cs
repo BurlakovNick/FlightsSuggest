@@ -1,4 +1,5 @@
-﻿using FlightsSuggest.AzureFunctions.Implementation.Factories;
+﻿using FlightsSuggest.AzureFunctions.Implementation.Commands;
+using FlightsSuggest.AzureFunctions.Implementation.Factories;
 using FlightsSuggest.AzureFunctions.Implementation.Storage;
 using FlightsSuggest.Core.Configuration;
 using FlightsSuggest.Core.Infrastructure;
@@ -58,6 +59,9 @@ namespace FlightsSuggest.AzureFunctions.Implementation.Container
             services.AddSingleton<INotifier, Notifier>();
             services.AddSingleton<FlightNotifier, FlightNotifier>();
             services.AddSingleton<ISubscriberDtoFactory, SubscriberDtoFactory>();
+
+            services.AddSingleton<ICommandParser, CommandParser>();
+            services.AddSingleton<ICommandFactory, CommandFactory>();
         }
     }
 }
